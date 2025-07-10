@@ -1,0 +1,1 @@
+Generate a formal AI usage policy for a {industry} company with {company_size} employees using {ai_use_case}. Include references to relevant compliance standards such as {compliance_target}.
