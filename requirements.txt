@@ -1,3 +1,9 @@
-uvicorn[standard]
 fastapi
+uvicorn[standard]
+langchain
 langchain_openai
+langchain_community
+pypdf
+unstructured
+python-multipart
+tiktoken
