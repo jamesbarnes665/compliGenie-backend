@@ -49,3 +49,8 @@ async def upload_file(file: UploadFile = File(...)):
 
     except Exception as e:
         return {"error": str(e)}
+from fastapi.responses import JSONResponse
+
+@app.get("/")
+def root():
+    return JSONResponse(content={"status": "CompliGenie backend is live."})

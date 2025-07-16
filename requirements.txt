@@ -7,3 +7,4 @@ pypdf
 unstructured
 python-multipart
 tiktoken
+python-dotenv
