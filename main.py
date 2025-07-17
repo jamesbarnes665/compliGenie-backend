@@ -30,11 +30,12 @@ async def generate_pdf(request: Request):
     industry = data.get("industry")
     company_size = data.get("company_size")
     compliance_target = data.get("compliance_target")
-    use_case = data.get("use_case")
+    use_case = data.get("ai_use_case") or data.get("use_case")
+    tone = data.get("tone", "Formal")  # Default to 'Formal' if not sent
 
     # Generate policy content from GPT-4
     policy_text = generate_policy_content(
-        industry, company_size, compliance_target, use_case
+        industry, company_size, compliance_target, use_case, tone
     )
 
     # Build HTML for PDF
@@ -47,6 +48,7 @@ async def generate_pdf(request: Request):
     <p><strong>Company Size:</strong> {company_size}</p>
     <p><strong>Compliance Target:</strong> {compliance_target}</p>
     <p><strong>Use Case:</strong> {use_case}</p>
+    <p><strong>Tone:</strong> {tone}</p>
     <hr>
     <pre>{policy_text}</pre>
     </body>
