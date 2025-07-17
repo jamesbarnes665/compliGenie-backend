@@ -9,3 +9,4 @@ python-multipart
 tiktoken
 python-dotenv
 reportlab
+pydantic
