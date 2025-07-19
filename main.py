@@ -24,7 +24,7 @@ app.add_middleware(
 )
 
 # Windows wkhtmltopdf config
-PDFKIT_CONFIG = pdfkit.configuration(
+PDFKIT_CONFIG = pdfkit.configuration()
     wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
 )
 
