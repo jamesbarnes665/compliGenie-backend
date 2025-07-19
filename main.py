@@ -25,8 +25,7 @@ app.add_middleware(
 
 # Windows wkhtmltopdf config
 PDFKIT_CONFIG = pdfkit.configuration()
-    wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
-)
+
 
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
