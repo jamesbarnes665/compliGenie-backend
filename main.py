@@ -95,4 +95,9 @@ async def generate_pdf(request: Request):
         sg = SendGridAPIClient(SENDGRID_API_KEY)
         sg.send(message)
 
-        return JSONResponse({"message
+        return JSONResponse({"message": "Policy PDF generated and sent by email."})
+
+    except Exception as e:
+        print("EXCEPTION OCCURRED:")
+        print(traceback.format_exc())
+        return JSONResponse(status_code=500, content={"error": str(e)})
