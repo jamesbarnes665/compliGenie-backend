@@ -10,6 +10,11 @@ from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileT
 import base64
 from dotenv import load_dotenv
 import traceback
+import requests  # NEW
+import io        # NEW
+from reportlab.lib.pagesizes import letter  # NEW
+from reportlab.pdfgen import canvas         # NEW
+from reportlab.lib.utils import ImageReader # NEW
 
 load_dotenv()
 
@@ -24,19 +29,43 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Linux-compatible wkhtmltopdf auto-discovery (no hardcoded Windows path)
+# Linux-compatible wkhtmltopdf auto-discovery
 PDFKIT_CONFIG = pdfkit.configuration()
 
-# Load environment variables
 SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
 SENDER_EMAIL = os.getenv("SENDER_EMAIL")
+
+
+def create_pdf_with_logo(text, output_path, recipient_email):
+    c = canvas.Canvas(output_path, pagesize=letter)
+    width, height = letter
+
+    # Extract domain and fetch logo
+    domain = recipient_email.split("@")[-1]
+    logo_url = f"https://logo.clearbit.com/{domain}"
+
+    try:
+        response = requests.get(logo_url, timeout=5)
+        if response.status_code == 200:
+            logo_stream = io.BytesIO(response.content)
+            logo = ImageReader(logo_stream)
+            c.drawImage(logo, 72, height - 60, width=120, height=40)
+    except Exception as e:
+        print(f"Logo fetch failed: {e}")
+
+    # Draw policy text
+    text_object = c.beginText(72, height - 120)
+    text_object.setFont("Helvetica", 11)
+    for line in text.splitlines():
+        text_object.textLine(line)
+    c.drawText(text_object)
+    c.save()
 
 
 @app.post("/generate")
 async def generate_pdf(request: Request):
     data = await request.json()
 
-    # ✅ Debugging output to Render logs
     print("DATA RECEIVED:", data)
     print("SENDGRID_API_KEY:", SENDGRID_API_KEY)
     print("SENDER_EMAIL:", SENDER_EMAIL)
@@ -49,29 +78,15 @@ async def generate_pdf(request: Request):
     recipient_email = data.get("recipient_email")
 
     try:
-        # Generate policy text
+        # 🧠 Generate policy text
         policy_text = generate_policy_content(industry, company_size, compliance_target, use_case, tone)
 
-        # HTML template
-        html = f"""
-        <html><body>
-        <h1>Generated Policy Document</h1>
-        <p><strong>Industry:</strong> {industry}</p>
-        <p><strong>Company Size:</strong> {company_size}</p>
-        <p><strong>Compliance Target:</strong> {compliance_target}</p>
-        <p><strong>Use Case:</strong> {use_case}</p>
-        <p><strong>Tone:</strong> {tone}</p>
-        <hr>
-        <pre>{policy_text}</pre>
-        </body></html>
-        """
-
-        # Save to local file
+        # 🖨 Create PDF with logo
         filename = f"{uuid.uuid4()}.pdf"
         filepath = f"./templates/{filename}"
-        pdfkit.from_string(html, filepath, configuration=PDFKIT_CONFIG)
+        create_pdf_with_logo(policy_text, filepath, recipient_email)
 
-        # Read and encode PDF
+        # 📨 Email with SendGrid
         with open(filepath, 'rb') as f:
             file_data = f.read()
             encoded = base64.b64encode(file_data).decode()
@@ -83,7 +98,6 @@ async def generate_pdf(request: Request):
             Disposition("attachment")
         )
 
-        # Build email
         message = Mail(
             from_email=SENDER_EMAIL,
             to_emails=recipient_email,
