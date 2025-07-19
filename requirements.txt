@@ -1,7 +1,8 @@
 fastapi
 uvicorn[standard]
-langchain-core
-langchain-openailangchain-community>=0.0.10
+langchain
+langchain_openai
+langchain_community>=0.0.10
 pypdf
 unstructured
 python-multipart
@@ -12,4 +13,4 @@ pydantic
 openai
 pdfkit
 stripe
-sendgrid==6.10.0
+sendgrid
