@@ -14,3 +14,4 @@ openai
 pdfkit
 stripe
 sendgrid
+langchain-community>=0.0.10
