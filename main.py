@@ -1,14 +1,20 @@
 from fastapi import FastAPI, Request
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from ai_engine import generate_policy_content
 import pdfkit
 import uuid
 import os
+from sendgrid import SendGridAPIClient
+from sendgrid.helpers.mail import Mail, Attachment, FileContent, FileName, FileType, Disposition
+import base64
+from dotenv import load_dotenv
+
+load_dotenv()
 
 app = FastAPI()
 
-# CORS configuration
+# CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -17,32 +23,31 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# PDFKit configuration for Windows
+# Windows wkhtmltopdf config
 PDFKIT_CONFIG = pdfkit.configuration(
-    wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"  # update this if your path differs
+    wkhtmltopdf="C:\\Program Files\\wkhtmltopdf\\bin\\wkhtmltopdf.exe"
 )
+
+SENDGRID_API_KEY = os.getenv("SENDGRID_API_KEY")
+SENDER_EMAIL = os.getenv("SENDER_EMAIL")
 
 @app.post("/generate")
 async def generate_pdf(request: Request):
     data = await request.json()
 
-    # Extract form input fields
     industry = data.get("industry")
     company_size = data.get("company_size")
     compliance_target = data.get("compliance_target")
-    use_case = data.get("ai_use_case") or data.get("use_case")
-    tone = data.get("tone", "Formal")  # Default to 'Formal' if not sent
+    use_case = data.get("use_case")
+    tone = data.get("tone")
+    recipient_email = data.get("recipient_email")  # added input
 
-    # Generate policy content from GPT-4
-    policy_text = generate_policy_content(
-        industry, company_size, compliance_target, use_case, tone
-    )
+    # Generate policy text
+    policy_text = generate_policy_content(industry, company_size, compliance_target, use_case, tone)
 
-    # Build HTML for PDF
+    # HTML template
     html = f"""
-    <html>
-    <head><meta charset="UTF-8"></head>
-    <body>
+    <html><body>
     <h1>Generated Policy Document</h1>
     <p><strong>Industry:</strong> {industry}</p>
     <p><strong>Company Size:</strong> {company_size}</p>
@@ -51,17 +56,38 @@ async def generate_pdf(request: Request):
     <p><strong>Tone:</strong> {tone}</p>
     <hr>
     <pre>{policy_text}</pre>
-    </body>
-    </html>
+    </body></html>
     """
 
-    # Save as PDF to /templates/
     filename = f"{uuid.uuid4()}.pdf"
     filepath = f"./templates/{filename}"
     pdfkit.from_string(html, filepath, configuration=PDFKIT_CONFIG)
 
-    return FileResponse(
-        path=filepath,
-        filename="policy.pdf",
-        media_type="application/pdf"
-    )
+    try:
+        # Read + encode PDF
+        with open(filepath, 'rb') as f:
+            data = f.read()
+            encoded = base64.b64encode(data).decode()
+
+        attachment = Attachment(
+            FileContent(encoded),
+            FileName("policy.pdf"),
+            FileType("application/pdf"),
+            Disposition("attachment")
+        )
+
+        message = Mail(
+            from_email=SENDER_EMAIL,
+            to_emails=recipient_email,
+            subject="Your CompliGenie Policy PDF",
+            html_content="<p>Attached is your generated policy document.</p>"
+        )
+        message.attachment = attachment
+
+        sg = SendGridAPIClient(SENDGRID_API_KEY)
+        sg.send(message)
+
+        return JSONResponse({"message": "Policy PDF generated and sent by email."})
+
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
