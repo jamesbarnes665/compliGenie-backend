@@ -1,11 +1,11 @@
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Optional
 import asyncio
 from datetime import datetime
 
 class PolicyGenerator:
     """
     Generates comprehensive AI policy content with detailed procedures and guidelines.
-    Enhanced version with 2-3 paragraphs per section and step-by-step guidance.
+    Enhanced version with industry-specific templates and 2-3 paragraphs per section.
     """
     
     async def generate(
@@ -13,24 +13,98 @@ class PolicyGenerator:
         company_name: str, 
         industry: str, 
         ai_tools: List[str], 
-        employee_count: int
+        employee_count: int,
+        industry_template: Optional[Dict] = None
     ) -> Dict[str, Any]:
         """
         Generate comprehensive policy content structure for PDF generation.
+        Now supports industry-specific templates.
         """
         
         # Format AI tools list
         tools_text = ", ".join(ai_tools) if ai_tools else "AI tools"
         
+        # Determine template type from industry_template if provided
+        template_type = "standard"
+        if industry_template:
+            # Derive template type from industry characteristics
+            if "legal" in industry.lower() or "Attorney-Client Privilege" in industry_template.get("compliance_frameworks", []):
+                template_type = "legal_focus"
+            elif "hr" in industry.lower() or "human resources" in industry.lower():
+                template_type = "hr_focus"
+            elif "insurance" in industry.lower() or "finance" in industry.lower() and "fraud_detection" in str(industry_template.get("specific_sections", {})):
+                template_type = "insurance_focus"
+            elif "consulting" in industry.lower() or "professional services" in industry.lower():
+                template_type = "consulting_focus"
+        
+        # Customize content based on template type
+        if template_type == "legal_focus":
+            template_emphasis = "with particular attention to legal compliance, liability mitigation, and contractual obligations"
+            additional_sections = [
+                {
+                    "title": "Legal Liability and Indemnification",
+                    "content": f"""This section addresses the legal liabilities associated with AI use at {company_name} and establishes indemnification procedures. The company recognizes that AI-generated content and decisions may create legal exposure in various contexts including contractual obligations, intellectual property disputes, and regulatory compliance matters. All employees must understand their personal liability when using AI tools and the company's indemnification policies.
+
+{company_name} will indemnify employees acting within the scope of their employment and in compliance with this policy. However, indemnification is void for willful violations, gross negligence, or actions outside authorized use cases. Employees must immediately notify Legal Counsel of any potential legal issues arising from AI use. The company maintains professional liability insurance covering AI-related claims, subject to policy terms and exclusions.
+
+Legal review is mandatory for all AI-generated content intended for external use, particularly in contracts, regulatory filings, or client communications. The Legal Department maintains templates and guidelines for AI-assisted legal work. Regular legal audits of AI usage ensure ongoing compliance and risk mitigation. All AI-related legal incidents must be documented in the legal risk register for trend analysis and prevention strategies.""",
+                    "subsections": []
+                }
+            ]
+        elif template_type == "hr_focus":
+            template_emphasis = "emphasizing employee development, workplace culture, and behavioral expectations"
+            additional_sections = [
+                {
+                    "title": "Employee Development and AI Skills",
+                    "content": f"""At {company_name}, we view AI proficiency as a critical skill for career advancement. This section outlines how AI usage factors into performance evaluations, promotion decisions, and professional development plans. Employees are encouraged to develop AI expertise through company-sponsored training, certification programs, and hands-on projects.
+
+Performance reviews will include assessment of AI tool proficiency and appropriate usage. Employees demonstrating exceptional AI skills may qualify for advancement opportunities and special projects. The company maintains an AI Champions program recognizing employees who excel in AI adoption and help colleagues improve their skills. Career pathways explicitly incorporate AI competencies at various levels.
+
+Manager responsibilities include fostering AI adoption within their teams, ensuring equitable access to AI tools, and addressing any concerns about job displacement. The company commits to reskilling employees whose roles are transformed by AI, providing transition support and new opportunity identification. Regular surveys assess employee sentiment regarding AI adoption and address concerns proactively.""",
+                    "subsections": []
+                }
+            ]
+        elif template_type == "insurance_focus":
+            template_emphasis = "focusing on risk assessment, incident prevention, and claims mitigation"
+            additional_sections = [
+                {
+                    "title": "Risk Assessment and Insurance Considerations",
+                    "content": f"""This section outlines the insurance implications of AI usage at {company_name} and establishes risk assessment procedures. The company maintains various insurance policies that may be affected by AI-related incidents including cyber liability, professional liability, and general business insurance. All employees must understand how their AI usage impacts insurance coverage and claims potential.
+
+Risk assessment is required before implementing new AI use cases. The assessment evaluates potential financial exposure, likelihood of incidents, and insurance coverage gaps. High-risk AI applications require additional approval and may necessitate supplemental insurance coverage. The Risk Management team maintains an AI risk register tracking identified risks, mitigation measures, and residual exposure.
+
+In the event of an AI-related incident with insurance implications, employees must follow specific procedures to preserve coverage. This includes immediate notification to Risk Management, preservation of all relevant documentation, and cooperation with insurance carrier investigations. Failure to follow these procedures may void coverage and create personal liability. Regular insurance reviews ensure adequate coverage as AI usage evolves.""",
+                    "subsections": []
+                }
+            ]
+        elif template_type == "consulting_focus":
+            template_emphasis = "prioritizing client confidentiality, professional standards, and service quality"
+            additional_sections = [
+                {
+                    "title": "Client Service and Professional Standards",
+                    "content": f"""As a professional services organization, {company_name} maintains the highest standards when using AI for client work. This section establishes requirements for AI use in client deliverables, consulting recommendations, and professional communications. All AI-assisted client work must meet or exceed traditional quality standards while maintaining complete transparency about AI involvement.
+
+Client consent is required before using AI tools for their specific projects or data. The consent process includes disclosure of which AI tools will be used, how client data will be protected, and human oversight procedures. Clients retain the right to opt out of AI-assisted services. Fee structures must transparently reflect AI usage, with appropriate adjustments for efficiency gains. Professional liability considerations require enhanced documentation of AI contributions to client work.
+
+Quality assurance for AI-assisted consulting work includes peer review by senior consultants, validation of all recommendations and analysis, and explicit documentation of AI versus human contributions. Client deliverables must clearly indicate where AI was used. The firm maintains professional liability insurance covering AI-assisted services. Regular client satisfaction surveys specifically address AI usage to ensure service quality meets expectations.""",
+                    "subsections": []
+                }
+            ]
+        else:  # standard template
+            template_emphasis = "providing comprehensive coverage for all aspects of AI usage"
+            additional_sections = []
+
         # Generate policy content with expanded sections
         policy_data = {
-            "title": f"Artificial Intelligence Usage Policy",
+            "title": f"Artificial Intelligence Usage Policy{' - ' + template_type.replace('_', ' ').title() if template_type != 'standard' else ''}",
             "company_name": company_name,
             "effective_date": datetime.now().strftime("%B %d, %Y"),
+            "industry": industry,
+            "compliance_frameworks": industry_template.get("compliance_frameworks", []) if industry_template else [],
             "sections": [
                 {
                     "title": "Purpose and Scope",
-                    "content": f"""This Artificial Intelligence (AI) Usage Policy establishes comprehensive guidelines and standards for the responsible use of AI technologies at {company_name}. As a {industry} company with {employee_count} employees, we recognize the transformative potential of AI while acknowledging the need for careful governance. This policy serves as the foundation for ethical, secure, and effective AI implementation across all departments and functions within our organization.
+                    "content": f"""This Artificial Intelligence (AI) Usage Policy establishes comprehensive guidelines and standards for the responsible use of AI technologies at {company_name}. As a {industry} company with {employee_count} employees, we recognize the transformative potential of AI while acknowledging the need for careful governance. This policy serves as the foundation for ethical, secure, and effective AI implementation across all departments and functions within our organization, {template_emphasis}.
 
 The rapid advancement of AI technologies presents both unprecedented opportunities and significant challenges. This policy addresses the need to harness AI's capabilities while mitigating risks related to data privacy, security, bias, and ethical considerations. It provides a framework for decision-making that balances innovation with responsibility, ensuring that our use of AI aligns with our corporate values and legal obligations.
 
@@ -263,7 +337,7 @@ Data retention and deletion requirements vary by jurisdiction and data type. AI 
                         },
                         {
                             "title": "Industry-Specific Requirements",
-                            "content": f"""Given our operation in the {industry} sector, additional requirements apply: For healthcare-related AI use, all systems must be HIPAA-compliant with appropriate Business Associate Agreements; For financial services applications, AI must not be used for credit decisions without human review and must maintain explainability for regulatory examination; For HR applications, AI cannot be the sole factor in hiring, promotion, or termination decisions and must be regularly audited for bias; For customer-facing applications, clear disclosure of AI use is required and customers must have the option to request human intervention. Industry associations and regulatory bodies continue to develop specific guidance for AI use in {industry}, which will be incorporated into this policy as it becomes available. Employees should consult with the Compliance team when planning any AI implementation that may be subject to industry-specific regulations."""
+                            "content": f"""Given our operation in the {industry} sector, additional requirements apply: {self._get_industry_specific_requirements(industry, industry_template)}. Industry associations and regulatory bodies continue to develop specific guidance for AI use in {industry}, which will be incorporated into this policy as it becomes available. Employees should consult with the Compliance team when planning any AI implementation that may be subject to industry-specific regulations."""
                         }
                     ]
                 },
@@ -321,7 +395,132 @@ Continuous learning opportunities keep employees current with AI developments. Q
                         }
                     ]
                 }
-            ]
+            ] + additional_sections  # Add the template-specific sections
         }
         
         return policy_data
+    
+    async def generate_enhanced(
+        self,
+        company_name: str,
+        industry: str,
+        ai_tools: List[str],
+        employee_count: int,
+        industry_template: Dict,
+        compliance_priority: str,
+        include_benchmarks: bool,
+        risk_tolerance: str
+    ) -> Dict[str, Any]:
+        """
+        Generate enhanced policy with additional customizations.
+        """
+        # First generate base policy with industry template
+        base_policy = await self.generate(
+            company_name=company_name,
+            industry=industry,
+            ai_tools=ai_tools,
+            employee_count=employee_count,
+            industry_template=industry_template
+        )
+        
+        # Add enhanced customizations
+        if compliance_priority == "strict":
+            # Add stricter compliance sections
+            base_policy["sections"].insert(1, {
+                "title": "Enhanced Compliance Framework",
+                "content": f"""Given the critical nature of compliance in the {industry} sector and {company_name}'s commitment to the highest standards, this enhanced framework establishes stricter controls than industry minimums. All AI usage must undergo pre-approval through the Compliance Review Board, with mandatory legal review for any external-facing applications. Monthly audits will verify adherence to all policies, with zero-tolerance for violations involving regulated data or processes.
+
+The enhanced compliance framework requires double-approval for any AI tool processing sensitive data, with both technical and legal sign-offs required. All AI interactions must be logged in immutable audit trails with cryptographic verification. Quarterly third-party assessments will validate our compliance posture, with results reported directly to the Board of Directors. Any compliance gaps identified must be remediated within 48 hours or the affected AI tools will be immediately suspended.""",
+                "subsections": []
+            })
+        
+        if include_benchmarks:
+            # Add industry benchmarking section
+            base_policy["sections"].append({
+                "title": "Industry Benchmarks and Best Practices",
+                "content": f"""This section establishes performance benchmarks based on industry leaders in {industry} AI adoption. {company_name} commits to meeting or exceeding these standards within 12 months of policy implementation. Key metrics include: AI tool adoption rate (target: 75% of eligible employees), incident rate (target: <0.1% of AI interactions), compliance audit score (target: 95%+), and ROI from AI initiatives (target: 300% within 2 years).
+
+Regular benchmarking against peer organizations ensures our AI governance remains competitive. Quarterly reports will compare our performance to industry averages, with action plans developed for any areas where we lag. Best practices from industry leaders will be incorporated into our procedures through our participation in industry associations and AI governance forums.""",
+                "subsections": []
+            })
+        
+        if risk_tolerance == "low":
+            # Add additional risk mitigation measures
+            base_policy["sections"].insert(2, {
+                "title": "Enhanced Risk Mitigation Measures",
+                "content": f"""Given {company_name}'s low risk tolerance, additional safeguards are required for all AI usage. Every AI implementation must undergo comprehensive risk assessment using our enhanced framework, evaluating technical, legal, reputational, and financial risks. High-risk applications require Board approval before deployment. Mandatory insurance review ensures adequate coverage for AI-related liabilities.
+
+Risk mitigation includes mandatory human-in-the-loop for all decisions affecting stakeholders, prohibition of fully automated decision-making, enhanced testing requirements with minimum 99.9% accuracy thresholds, and mandatory rollback procedures for all AI deployments. Monthly risk reviews assess the cumulative risk profile of our AI portfolio, with immediate action required if aggregate risk exceeds acceptable thresholds.""",
+                "subsections": []
+            })
+        
+        # Update title to reflect enhanced nature
+        base_policy["title"] += " - Enhanced Edition"
+        
+        return base_policy
+    
+    async def preview_sections(
+        self,
+        industry: str,
+        ai_tools: List[str],
+        industry_template: Dict
+    ) -> List[str]:
+        """
+        Preview the sections that will be included in the policy.
+        """
+        sections = [
+            "Purpose and Scope",
+            "Approved AI Tools and Technologies",
+            "AI Tool-Specific Usage Guidelines",
+            "Data Security and Privacy",
+            "Acceptable Use Guidelines",
+            "Compliance and Regulatory Requirements",
+            "Intellectual Property and Attribution",
+            "Monitoring and Enforcement",
+            "Training and Support"
+        ]
+        
+        # Add industry-specific sections based on template
+        if industry_template:
+            if "client_confidentiality" in str(industry_template.get("specific_sections", {})):
+                sections.append("Client Service and Professional Standards")
+            if "patient_data" in str(industry_template.get("specific_sections", {})):
+                sections.append("Healthcare Data Protection")
+            if "financial_data" in str(industry_template.get("specific_sections", {})):
+                sections.append("Financial Data Governance")
+            if "legal" in industry.lower():
+                sections.append("Legal Liability and Indemnification")
+        
+        # Add tool-specific sections
+        if any("copilot" in tool.lower() for tool in ai_tools):
+            sections.append("Code Generation Best Practices")
+        if any("midjourney" in tool.lower() or "dall-e" in tool.lower() for tool in ai_tools):
+            sections.append("Visual Content Guidelines")
+        
+        return sections
+    
+    def _get_industry_specific_requirements(self, industry: str, industry_template: Optional[Dict]) -> str:
+        """
+        Generate industry-specific compliance requirements text.
+        """
+        if not industry_template:
+            return "General business compliance standards apply."
+        
+        frameworks = industry_template.get("compliance_frameworks", [])
+        requirements = []
+        
+        if "HIPAA" in frameworks:
+            requirements.append("For healthcare-related AI use, all systems must be HIPAA-compliant with appropriate Business Associate Agreements")
+        if "SOX" in frameworks or "GLBA" in frameworks:
+            requirements.append("For financial services applications, AI must not be used for credit decisions without human review and must maintain explainability for regulatory examination")
+        if "FERPA" in frameworks:
+            requirements.append("For education-related applications, student data protection under FERPA is mandatory with parental consent requirements for minors")
+        if "GDPR" in frameworks:
+            requirements.append("For all personal data processing, GDPR requirements including right to explanation and data portability must be maintained")
+        if "PCI-DSS" in frameworks:
+            requirements.append("For payment processing applications, PCI-DSS compliance is mandatory with no credit card data processed through AI systems")
+        
+        if not requirements:
+            return "Industry-standard compliance requirements apply with regular review for emerging regulations"
+        
+        return "; ".join(requirements)

@@ -3,12 +3,23 @@ from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import os
+from pydantic import BaseModel
+from typing import List, Optional
 
 # Import your routes
 from app.api import policies
 
 # Load environment variables
 load_dotenv()
+
+# Create request models
+class PolicyRequest(BaseModel):
+    company_name: str
+    industry: str
+    ai_tools: List[str]
+    employee_count: int
+    template_type: str = "standard"  # NEW FIELD
+    recipient_email: Optional[str] = None
 
 # Create FastAPI app
 app = FastAPI(
@@ -89,9 +100,10 @@ async def legacy_generate(request: Request):
         "industry": data.get("industry", "Technology"),
         "employee_count": int(data.get("company_size", "50").split("-")[0]),
         "ai_tools": ["ChatGPT", "Claude"],  # Default tools
+        "template_type": "standard",  # Default template
         "recipient_email": data.get("recipient_email")
     }
     
     # Redirect to new endpoint
     from app.api.policies import generate_policy
-    return await generate_policy(new_format)
+    return await generate_policy(PolicyRequest(**new_format))
