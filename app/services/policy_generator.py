@@ -65,6 +65,155 @@ The use of personal or unapproved AI tools for company business is strictly proh
                     ]
                 },
                 {
+                    "title": "AI Tool-Specific Usage Guidelines",
+                    "content": f"""This section provides detailed guidance for each approved AI tool at {company_name}. Every AI platform has unique capabilities, limitations, and risks that must be understood and managed. Employees must follow these tool-specific guidelines in addition to the general policy requirements. Regular updates to these guidelines will be provided as AI tools evolve and new features become available. All employees must complete tool-specific training before gaining access to each platform.
+
+The guidelines below are organized by tool category and include specific use cases, prohibited activities, data handling requirements, and output review procedures. These guidelines are based on extensive testing, vendor documentation, and industry best practices. Violations of tool-specific guidelines will be treated with the same severity as violations of the general policy. When in doubt about appropriate use of any AI tool, employees should consult with their manager or the AI Center of Excellence before proceeding.
+
+Each tool section includes real-world scenarios to illustrate appropriate and inappropriate use cases. These examples are drawn from actual business situations and are designed to provide practical guidance. Employees are encouraged to submit additional scenarios for inclusion in future updates. The AI Governance Committee reviews and updates these guidelines quarterly based on user feedback, incident reports, and changes in tool capabilities.""",
+                    "subsections": [
+                        {
+                            "title": "Text Generation Tools (ChatGPT, Claude)",
+                            "content": f"""ChatGPT and Claude are powerful language models capable of generating human-like text for various purposes. At {company_name}, these tools are approved for specific use cases that enhance productivity while maintaining security and quality standards.
+
+**Approved Use Cases:**
+• Initial Draft Creation: Use for creating first drafts of emails, reports, presentations, and documentation. Always review and edit before finalizing.
+• Brainstorming and Ideation: Generate ideas for projects, marketing campaigns, product features, or problem-solving approaches.
+• Code Documentation: Create clear explanations of code functionality, API documentation, and technical guides.
+• Research Assistance: Gather general information on topics, industry trends, and best practices (always verify with authoritative sources).
+• Language Translation: Initial translation of non-sensitive content (professional translation required for official documents).
+• Meeting Summaries: Create structured summaries from meeting notes (exclude confidential discussions).
+
+**Prohibited Uses:**
+• Customer Communications: Never use for final customer-facing content without thorough human review and approval.
+• Sensitive Data Processing: Do not input PII, financial data, health information, or proprietary business information.
+• Legal or Compliance Documents: Cannot be used for contracts, legal advice, or regulatory filings.
+• Executive Communications: C-suite communications must be human-authored.
+• Financial Analysis: Do not use for investment decisions or financial projections.
+
+**Data Privacy Considerations:**
+When using ChatGPT or Claude, assume all inputs may be retained for model training. Use these privacy protection strategies:
+• Replace real names with placeholders ([CUSTOMER], [EMPLOYEE], [COMPANY])
+• Use generic examples instead of actual data
+• Avoid specific dates, amounts, or identifying details
+• Never paste entire documents containing mixed sensitivity levels
+• Clear conversation history regularly
+
+**Output Review Requirements:**
+All AI-generated text must undergo mandatory review before use:
+1. Fact-check all claims and statistics against reliable sources
+2. Verify tone aligns with {company_name} brand voice
+3. Ensure no hallucinated information or false claims
+4. Check for potential bias or inappropriate content
+5. Confirm compliance with industry regulations
+6. Document AI assistance for audit purposes
+
+**Example Scenarios:**
+✅ APPROPRIATE: "Draft an email template for welcoming new clients to our services" (generic, no sensitive data)
+❌ INAPPROPRIATE: "Write a response to John Smith's complaint about his account #12345" (contains PII)
+✅ APPROPRIATE: "Suggest structure for a quarterly business review presentation" (general guidance)
+❌ INAPPROPRIATE: "Analyze our Q3 revenue of $2.5M and project Q4 performance" (confidential financial data)"""
+                        },
+                        {
+                            "title": "Code Generation Tools (GitHub Copilot)",
+                            "content": f"""GitHub Copilot is an AI-powered code completion tool that can significantly enhance developer productivity. However, its use at {company_name} must be carefully managed to protect intellectual property and ensure code quality.
+
+**Approved Use Cases:**
+• Boilerplate Code Generation: Create standard code patterns, setup files, and common configurations.
+• Unit Test Creation: Generate test cases and test structures (always verify test coverage and accuracy).
+• Code Comments and Documentation: Auto-generate inline comments and function documentation.
+• Algorithm Implementation: Implement well-known algorithms and data structures.
+• Language Syntax Help: Assist with syntax in unfamiliar programming languages.
+• Debugging Assistance: Suggest fixes for common errors and exceptions.
+
+**Prohibited Uses:**
+• Proprietary Algorithm Implementation: Never use for company-specific algorithms or business logic.
+• Security-Critical Code: Do not use for authentication, encryption, or access control implementations.
+• Database Queries with Real Data: Avoid generating queries that might expose data structure.
+• API Key or Credential Handling: Never use for code involving secrets or credentials.
+• Copy-Paste from Unknown Sources: Do not accept suggestions that appear to be from copyrighted sources.
+
+**Code Review Requirements:**
+All Copilot-generated code must undergo enhanced review:
+1. Security Review: Check for vulnerabilities, especially in input validation and data handling
+2. License Compliance: Ensure generated code doesn't violate open-source licenses
+3. Performance Testing: Verify efficiency and scalability of generated algorithms
+4. Code Quality: Ensure adherence to {company_name} coding standards
+5. Intellectual Property: Confirm no proprietary patterns from other companies
+6. Documentation: Add human-written comments explaining business logic
+
+**Best Practices:**
+• Configure Copilot to exclude files containing sensitive patterns
+• Use .copilotignore file to prevent analysis of proprietary code
+• Enable telemetry blocking to prevent code sharing
+• Regular security scans of Copilot-assisted code
+• Maintain human ownership of all architectural decisions
+• Document which code sections received AI assistance
+
+**Example Scenarios:**
+✅ APPROPRIATE: Generate a React component for a standard data table display
+❌ INAPPROPRIATE: Generate customer authentication flow for banking application
+✅ APPROPRIATE: Create unit tests for a utility function that formats dates
+❌ INAPPROPRIATE: Generate SQL queries for actual customer database"""
+                        },
+                        {
+                            "title": "Image Generation Tools (Midjourney, DALL-E, Stable Diffusion)",
+                            "content": f"""AI image generation tools offer powerful capabilities for creating visual content. At {company_name}, these tools must be used responsibly to avoid legal issues and maintain brand standards.
+
+**Approved Use Cases:**
+• Concept Art and Mockups: Create initial design concepts for internal review and brainstorming.
+• Presentation Graphics: Generate abstract images and backgrounds for internal presentations.
+• Marketing Ideation: Develop visual concepts for campaigns (final assets must be professionally created).
+• Training Materials: Create generic illustrations for internal documentation and guides.
+• Placeholder Images: Generate temporary images for development and testing.
+• Creative Exploration: Experiment with visual styles and artistic directions.
+
+**Prohibited Uses:**
+• People Generation: Never create images of real or realistic people (privacy and consent issues).
+• Logo or Trademark Creation: Do not generate logos that might infringe on existing trademarks.
+• Final Marketing Assets: AI-generated images cannot be used in external marketing without legal review.
+• Competitor Imitation: Avoid generating images in the style of competitor brands.
+• Inappropriate Content: No generation of offensive, violent, or discriminatory imagery.
+• Celebrity or Public Figure Likeness: Prohibited due to personality rights.
+
+**Copyright and Legal Considerations:**
+• All AI-generated images must be reviewed by Legal before external use
+• Cannot claim copyright on raw AI output - only on human-modified versions
+• Must disclose AI use in commercial applications where required
+• Avoid prompts referencing copyrighted characters or artistic styles
+• Maintain records of prompts and generation parameters
+• Purchase commercial licenses where required by platform terms
+
+**Brand Compliance Requirements:**
+1. Review against {company_name} brand guidelines
+2. Ensure color schemes align with brand palette
+3. Verify imagery supports brand values and messaging
+4. Check for unintended symbols or meanings
+5. Confirm cultural appropriateness for target markets
+6. Document approval chain for external use
+
+**Quality Control Process:**
+• Initial Generation: Create multiple variations for selection
+• Human Curation: Select most appropriate options
+• Modification: Add human creative elements
+• Legal Review: For any external use
+• Brand Review: Ensure alignment with guidelines
+• Final Approval: Department head sign-off required
+
+**Example Scenarios:**
+✅ APPROPRIATE: "Create an abstract technology background for slide deck"
+❌ INAPPROPRIATE: "Generate headshot of our CEO for company website"
+✅ APPROPRIATE: "Design concept for futuristic office space"
+❌ INAPPROPRIATE: "Create image in Disney/Pixar style for children's product"
+
+**Special Considerations for Each Platform:**
+• Midjourney: Best for artistic and creative outputs; review community guidelines
+• DALL-E: Strong for photorealistic images; careful with people generation
+• Stable Diffusion: Highly customizable; ensure proper model selection"""
+                        }
+                    ]
+                },
+                {
                     "title": "Data Security and Privacy",
                     "content": f"""Protection of sensitive data is paramount when using AI technologies. {company_name} maintains a zero-tolerance policy for unauthorized disclosure of confidential information through AI systems. All employees must understand that AI systems may retain, analyze, and use input data for model training unless specifically configured otherwise. This means that any information entered into an AI system should be considered potentially public and permanent. Before using any AI tool, employees must carefully review the data classification of all information they intend to process and ensure it aligns with approved use cases.
 
