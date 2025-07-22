@@ -25,10 +25,15 @@ INDUSTRY_TEMPLATES = {
             "medical_device_integration": True
         },
         "risk_level": "critical",
-        "audit_frequency": "quarterly"
+        "audit_frequency": "quarterly",
+        "ai_compliance": {
+            "transparency_level": "high",
+            "bias_testing_frequency": "monthly",
+            "audit_retention": "6 years"
+        }
     },
     "finance": {
-        "compliance_frameworks": ["SOX", "GLBA", "GDPR", "CCPA"],
+        "compliance_frameworks": ["SOX", "GLBA", "GDPR", "CCPA", "FCRA", "ECOA"],
         "data_sensitivity": "high",
         "specific_sections": {
             "financial_data": True,
@@ -36,7 +41,12 @@ INDUSTRY_TEMPLATES = {
             "fraud_detection": True
         },
         "risk_level": "critical",
-        "audit_frequency": "monthly"
+        "audit_frequency": "monthly",
+        "ai_compliance": {
+            "transparency_level": "high",
+            "bias_testing_frequency": "monthly",
+            "audit_retention": "7 years"
+        }
     },
     "education": {
         "compliance_frameworks": ["FERPA", "COPPA", "GDPR"],
@@ -47,7 +57,12 @@ INDUSTRY_TEMPLATES = {
             "parental_consent": True
         },
         "risk_level": "high",
-        "audit_frequency": "semi-annual"
+        "audit_frequency": "semi-annual",
+        "ai_compliance": {
+            "transparency_level": "medium",
+            "bias_testing_frequency": "quarterly",
+            "audit_retention": "3 years"
+        }
     },
     "retail": {
         "compliance_frameworks": ["PCI-DSS", "GDPR", "CCPA"],
@@ -58,7 +73,12 @@ INDUSTRY_TEMPLATES = {
             "inventory_management": True
         },
         "risk_level": "medium",
-        "audit_frequency": "quarterly"
+        "audit_frequency": "quarterly",
+        "ai_compliance": {
+            "transparency_level": "medium",
+            "bias_testing_frequency": "quarterly",
+            "audit_retention": "3 years"
+        }
     },
     "manufacturing": {
         "compliance_frameworks": ["ISO 9001", "OSHA", "EPA"],
@@ -69,7 +89,12 @@ INDUSTRY_TEMPLATES = {
             "supply_chain": True
         },
         "risk_level": "medium",
-        "audit_frequency": "quarterly"
+        "audit_frequency": "quarterly",
+        "ai_compliance": {
+            "transparency_level": "medium",
+            "bias_testing_frequency": "semi-annual",
+            "audit_retention": "3 years"
+        }
     },
     "technology": {
         "compliance_frameworks": ["SOC 2", "ISO 27001", "GDPR"],
@@ -80,7 +105,12 @@ INDUSTRY_TEMPLATES = {
             "development_practices": True
         },
         "risk_level": "high",
-        "audit_frequency": "quarterly"
+        "audit_frequency": "quarterly",
+        "ai_compliance": {
+            "transparency_level": "high",
+            "bias_testing_frequency": "quarterly",
+            "audit_retention": "3 years"
+        }
     },
     "legal": {
         "compliance_frameworks": ["ABA Model Rules", "GDPR", "Attorney-Client Privilege"],
@@ -91,7 +121,12 @@ INDUSTRY_TEMPLATES = {
             "legal_research": True
         },
         "risk_level": "critical",
-        "audit_frequency": "monthly"
+        "audit_frequency": "monthly",
+        "ai_compliance": {
+            "transparency_level": "critical",
+            "bias_testing_frequency": "monthly",
+            "audit_retention": "7 years"
+        }
     },
     "government": {
         "compliance_frameworks": ["FISMA", "FedRAMP", "NIST"],
@@ -102,7 +137,57 @@ INDUSTRY_TEMPLATES = {
             "transparency_requirements": True
         },
         "risk_level": "critical",
-        "audit_frequency": "monthly"
+        "audit_frequency": "monthly",
+        "ai_compliance": {
+            "transparency_level": "critical",
+            "bias_testing_frequency": "monthly",
+            "audit_retention": "7 years"
+        }
+    },
+    "insurance": {
+        "compliance_frameworks": ["NAIC", "GDPR", "State Insurance Regulations"],
+        "data_sensitivity": "high",
+        "specific_sections": {
+            "underwriting_decisions": True,
+            "claims_processing": True,
+            "actuarial_models": True
+        },
+        "risk_level": "high",
+        "audit_frequency": "quarterly",
+        "ai_compliance": {
+            "transparency_level": "high",
+            "bias_testing_frequency": "monthly",
+            "audit_retention": "5 years"
+        }
+    }
+}
+
+# State-specific compliance requirements
+STATE_COMPLIANCE = {
+    "CA": {
+        "frameworks": ["CCPA", "SB 1001", "Unruh Act"],
+        "ai_specific": ["Bot disclosure", "Automated decision opt-out"],
+        "retention_period": "4 years"
+    },
+    "NY": {
+        "frameworks": ["SHIELD Act", "DFS Cybersecurity"],
+        "ai_specific": ["NYC Local Law 144", "Bias audit requirements"],
+        "retention_period": "6 years"
+    },
+    "IL": {
+        "frameworks": ["BIPA"],
+        "ai_specific": ["Biometric data consent", "AI notification"],
+        "retention_period": "3 years"
+    },
+    "CO": {
+        "frameworks": ["CPA"],
+        "ai_specific": ["Profiling opt-out", "AI impact assessments"],
+        "retention_period": "3 years"
+    },
+    "WA": {
+        "frameworks": ["WPA"],
+        "ai_specific": ["Algorithmic accountability", "AI transparency"],
+        "retention_period": "3 years"
     }
 }
 
@@ -110,6 +195,7 @@ INDUSTRY_TEMPLATES = {
 class PolicyGenerationRequest(BaseModel):
     company_name: str
     industry: str
+    state: str  # Added state field
     ai_tools: List[str]
     employee_count: int
     partner_id: Optional[str] = None
@@ -126,18 +212,40 @@ class EnhancedPolicyRequest(PolicyGenerationRequest):
     include_industry_benchmarks: Optional[bool] = True
     custom_compliance_frameworks: Optional[List[str]] = None
     risk_tolerance: Optional[str] = "medium"  # low, medium, high
+    include_ai_compliance: Optional[bool] = True  # New field for AI compliance
+
+# New models for AI compliance
+class ComplianceRequirementsRequest(BaseModel):
+    industry: str
+    state: str
+
+class ComplianceRequirementsResponse(BaseModel):
+    industry_compliance: Dict
+    state_requirements: Dict
+    ai_transparency_level: str
+    bias_testing_frequency: str
+    audit_retention_period: str
 
 @router.post("/generate")
 async def generate_policy(request: PolicyGenerationRequest):
-    """Generate AI policy with industry-specific templates"""
+    """Generate AI policy with industry-specific templates and AI compliance sections"""
     try:
-        print(f"Generating policy for {request.company_name} in {request.industry}")
+        print(f"Generating policy for {request.company_name} in {request.industry}, {request.state}")
         
         # Get industry template
         industry_template = INDUSTRY_TEMPLATES.get(
             request.industry.lower(), 
             get_default_template()
         )
+        
+        # Get state compliance requirements
+        state_compliance = STATE_COMPLIANCE.get(
+            request.state.upper(),
+            get_default_state_compliance()
+        )
+        
+        # Merge state requirements into template
+        industry_template["state_compliance"] = state_compliance
         
         # Merge with any custom templates
         if request.template_customizations:
@@ -146,7 +254,7 @@ async def generate_policy(request: PolicyGenerationRequest):
                 request.template_customizations
             )
         
-        # Generate policy content with industry focus
+        # Generate policy content with industry focus and AI compliance
         policy_generator = PolicyGenerator()
         policy_content = await policy_generator.generate(
             company_name=request.company_name,
@@ -156,6 +264,9 @@ async def generate_policy(request: PolicyGenerationRequest):
             industry_template=industry_template
         )
         
+        # Add state to policy content for PDF generation
+        policy_content["state"] = request.state
+        
         # Create PDF with enhanced formatting
         pdf_generator = EnhancedPDFGenerator()
         
@@ -164,7 +275,7 @@ async def generate_policy(request: PolicyGenerationRequest):
         if request.partner_id:
             partner_branding = await get_partner_branding(request.partner_id)
         
-        # Generate PDF without metadata parameter
+        # Generate PDF
         pdf_buffer = pdf_generator.generate_policy_pdf(
             policy_content,
             partner_branding=partner_branding
@@ -175,7 +286,7 @@ async def generate_policy(request: PolicyGenerationRequest):
             pdf_buffer,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f"attachment; filename=ai_policy_{request.company_name.replace(' ', '_')}_{request.industry}.pdf"
+                "Content-Disposition": f"attachment; filename=ai_policy_{request.company_name.replace(' ', '_')}_{request.industry}_{request.state}.pdf"
             }
         )
         
@@ -186,13 +297,21 @@ async def generate_policy(request: PolicyGenerationRequest):
 
 @router.post("/generate/enhanced")
 async def generate_enhanced_policy(request: EnhancedPolicyRequest):
-    """Generate AI policy with advanced industry customizations"""
+    """Generate AI policy with advanced industry customizations and AI compliance"""
     try:
         # Get base industry template
         industry_template = INDUSTRY_TEMPLATES.get(
             request.industry.lower(), 
             get_default_template()
         )
+        
+        # Get state compliance
+        state_compliance = STATE_COMPLIANCE.get(
+            request.state.upper(),
+            get_default_state_compliance()
+        )
+        
+        industry_template["state_compliance"] = state_compliance
         
         # Apply enhanced customizations
         if request.custom_compliance_frameworks:
@@ -204,8 +323,10 @@ async def generate_enhanced_policy(request: EnhancedPolicyRequest):
         if request.compliance_priority == "strict":
             industry_template["audit_frequency"] = "monthly"
             industry_template["risk_level"] = "critical"
+            industry_template["ai_compliance"]["bias_testing_frequency"] = "weekly"
         elif request.compliance_priority == "flexible":
             industry_template["audit_frequency"] = "annual"
+            industry_template["ai_compliance"]["bias_testing_frequency"] = "annual"
         
         # Generate policy with enhanced options
         policy_generator = PolicyGenerator()
@@ -219,6 +340,9 @@ async def generate_enhanced_policy(request: EnhancedPolicyRequest):
             include_benchmarks=request.include_industry_benchmarks,
             risk_tolerance=request.risk_tolerance
         )
+        
+        # Add state to policy content
+        policy_content["state"] = request.state
         
         # Create PDF
         pdf_generator = EnhancedPDFGenerator()
@@ -235,12 +359,48 @@ async def generate_enhanced_policy(request: EnhancedPolicyRequest):
             pdf_buffer,
             media_type="application/pdf",
             headers={
-                "Content-Disposition": f"attachment; filename=ai_policy_{request.company_name.replace(' ', '_')}_{request.industry}_enhanced.pdf"
+                "Content-Disposition": f"attachment; filename=ai_policy_{request.company_name.replace(' ', '_')}_{request.industry}_{request.state}_enhanced.pdf"
             }
         )
         
     except Exception as e:
         print(f"Error generating enhanced policy: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.get("/compliance-requirements")
+async def get_compliance_requirements(industry: str, state: str):
+    """Get AI compliance requirements for preview"""
+    try:
+        # Get industry template
+        industry_template = INDUSTRY_TEMPLATES.get(
+            industry.lower(),
+            get_default_template()
+        )
+        
+        # Get state requirements
+        state_reqs = STATE_COMPLIANCE.get(
+            state.upper(),
+            get_default_state_compliance()
+        )
+        
+        # Create policy generator to get compliance config
+        policy_generator = PolicyGenerator()
+        compliance_config = policy_generator.compliance_config
+        
+        # Get detailed compliance requirements
+        industry_compliance = compliance_config.get_industry_compliance(industry)
+        state_requirements = compliance_config.get_state_requirements(state)
+        
+        return ComplianceRequirementsResponse(
+            industry_compliance=industry_compliance,
+            state_requirements=state_requirements,
+            ai_transparency_level=industry_template.get("ai_compliance", {}).get("transparency_level", "medium"),
+            bias_testing_frequency=industry_template.get("ai_compliance", {}).get("bias_testing_frequency", "quarterly"),
+            audit_retention_period=state_requirements.get("retention_period", "3 years")
+        )
+        
+    except Exception as e:
+        print(f"Error getting compliance requirements: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 @router.get("/templates/{industry}")
@@ -262,7 +422,8 @@ async def get_industry_template(industry: str):
             "data_sensitivity",
             "specific_sections",
             "risk_level",
-            "audit_frequency"
+            "audit_frequency",
+            "ai_compliance"
         ]
     )
 
@@ -272,10 +433,13 @@ async def list_industry_templates():
     return {
         "industries": list(INDUSTRY_TEMPLATES.keys()),
         "templates": INDUSTRY_TEMPLATES,
+        "state_compliance": STATE_COMPLIANCE,
         "customization_options": {
             "compliance_priority": ["balanced", "strict", "flexible"],
             "risk_tolerance": ["low", "medium", "high"],
-            "data_sensitivity": ["low", "medium", "high", "critical"]
+            "data_sensitivity": ["low", "medium", "high", "critical"],
+            "ai_transparency_level": ["low", "medium", "high", "critical"],
+            "bias_testing_frequency": ["weekly", "monthly", "quarterly", "semi-annual", "annual"]
         }
     }
 
@@ -296,10 +460,19 @@ async def preview_policy_sections(request: PolicyGenerationRequest):
             industry_template=industry_template
         )
         
+        # Check if AI compliance sections are included
+        ai_compliance_sections = [
+            "AI Transparency Requirements",
+            "AI Bias Prevention Measures",
+            "AI Audit Trail Requirements"
+        ]
+        
         return {
             "industry": request.industry,
+            "state": request.state,
             "sections": sections_preview,
             "compliance_frameworks": industry_template.get("compliance_frameworks", []),
+            "ai_compliance_included": any(section in sections_preview for section in ai_compliance_sections),
             "estimated_pages": estimate_page_count(sections_preview, request.ai_tools)
         }
         
@@ -307,13 +480,30 @@ async def preview_policy_sections(request: PolicyGenerationRequest):
         print(f"Error previewing sections: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+@router.get("/states")
+async def list_states_with_compliance():
+    """List all states with their AI compliance requirements"""
+    return {
+        "states": list(STATE_COMPLIANCE.keys()),
+        "compliance_details": STATE_COMPLIANCE,
+        "default_states": ["CA", "NY", "IL", "CO", "WA"],
+        "states_with_ai_laws": {
+            "CA": "SB 1001 (Bot Disclosure), CCPA",
+            "NY": "NYC Local Law 144 (Bias Audits)",
+            "IL": "BIPA (Biometric Data)",
+            "CO": "CPA (AI Assessments)",
+            "WA": "Algorithmic Accountability"
+        }
+    }
+
 @router.get("/test")
 async def test_endpoint():
     """Test endpoint to verify API is working"""
     return {
         "message": "Policies API is working",
         "available_industries": list(INDUSTRY_TEMPLATES.keys()),
-        "version": "1.19f"
+        "ai_compliance_enabled": True,
+        "version": "1.11a"
     }
 
 # Helper functions
@@ -328,7 +518,20 @@ def get_default_template() -> Dict:
             "ethical_guidelines": True
         },
         "risk_level": "medium",
-        "audit_frequency": "semi-annual"
+        "audit_frequency": "semi-annual",
+        "ai_compliance": {
+            "transparency_level": "medium",
+            "bias_testing_frequency": "quarterly",
+            "audit_retention": "3 years"
+        }
+    }
+
+def get_default_state_compliance() -> Dict:
+    """Return default state compliance for states without specific requirements"""
+    return {
+        "frameworks": ["General State Privacy Laws"],
+        "ai_specific": ["General AI disclosure requirements"],
+        "retention_period": "3 years"
     }
 
 def merge_templates(base_template: Dict, customizations: Dict) -> Dict:
@@ -375,4 +578,12 @@ def estimate_page_count(sections: List[str], ai_tools: List[str]) -> int:
     section_pages = len(sections) * 2  # Average 2 pages per section
     tool_pages = len(ai_tools) * 0.5  # Half page per AI tool
     
-    return int(base_pages + section_pages + tool_pages)
+    # Add extra pages for AI compliance sections
+    ai_compliance_sections = [
+        "AI Transparency Requirements",
+        "AI Bias Prevention Measures",
+        "AI Audit Trail Requirements"
+    ]
+    ai_compliance_pages = sum(3 for section in sections if section in ai_compliance_sections)
+    
+    return int(base_pages + section_pages + tool_pages + ai_compliance_pages)

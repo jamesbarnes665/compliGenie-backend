@@ -57,6 +57,22 @@ class EnhancedPDFGenerator:
             leading=20
         ))
         
+        # AI Compliance Section heading style (new)
+        self.styles.add(ParagraphStyle(
+            name='AIComplianceHeading',
+            parent=self.styles['Heading1'],
+            fontSize=16,
+            textColor=colors.HexColor('#2980b9'),  # Blue color for AI compliance
+            spaceBefore=24,
+            spaceAfter=12,
+            leftIndent=0,
+            keepWithNext=True,
+            leading=20,
+            borderColor=colors.HexColor('#2980b9'),
+            borderWidth=1,
+            borderPadding=6
+        ))
+        
         # Subsection heading style
         self.styles.add(ParagraphStyle(
             name='SubsectionHeading',
@@ -84,6 +100,21 @@ class EnhancedPDFGenerator:
             wordWrap='CJK'  # Better word wrapping
         ))
         
+        # AI Compliance body text style (new)
+        self.styles.add(ParagraphStyle(
+            name='AIComplianceBody',
+            parent=self.styles['BodyText'],
+            fontSize=11,
+            alignment=TA_JUSTIFY,
+            spaceBefore=6,
+            spaceAfter=6,
+            leftIndent=0,
+            rightIndent=0,
+            leading=16,
+            textColor=colors.HexColor('#2c3e50'),
+            backColor=colors.HexColor('#ecf0f1')  # Light gray background
+        ))
+        
         # Bullet list style
         self.styles.add(ParagraphStyle(
             name='BulletList',
@@ -94,6 +125,21 @@ class EnhancedPDFGenerator:
             spaceAfter=3,
             bulletIndent=0.25*inch,
             leading=16
+        ))
+        
+        # AI Compliance Notice style (new)
+        self.styles.add(ParagraphStyle(
+            name='ComplianceNotice',
+            parent=self.styles['BodyText'],
+            fontSize=10,
+            alignment=TA_CENTER,
+            spaceBefore=12,
+            spaceAfter=12,
+            textColor=colors.HexColor('#2980b9'),
+            borderColor=colors.HexColor('#2980b9'),
+            borderWidth=1,
+            borderPadding=8,
+            leading=14
         ))
 
     def _add_page_numbers(self, canvas, doc):
@@ -136,6 +182,15 @@ class EnhancedPDFGenerator:
                 wrapped_lines.append(line)
         
         return '\n'.join(wrapped_lines)
+
+    def _is_ai_compliance_section(self, section_title):
+        """Check if this is one of the new AI compliance sections"""
+        ai_sections = [
+            "AI Transparency Requirements",
+            "AI Bias Prevention Measures", 
+            "AI Audit Trail Requirements"
+        ]
+        return any(ai_section in section_title for ai_section in ai_sections)
 
     def generate_policy_pdf(self, policy_data, partner_branding=None):
         """
@@ -187,30 +242,65 @@ class EnhancedPDFGenerator:
         
         story.append(Spacer(1, 0.5*inch))
         
+        # Add compliance notice for policies with AI compliance sections
+        has_ai_compliance = any(self._is_ai_compliance_section(section.get('title', '')) 
+                               for section in policy_data.get('sections', []))
+        
+        if has_ai_compliance:
+            story.append(Paragraph(
+                "<b>This policy includes enhanced AI compliance sections for transparency, "
+                "bias prevention, and audit trail requirements.</b>",
+                self.styles['ComplianceNotice']
+            ))
+            story.append(Spacer(1, 0.25*inch))
+        
         # Add table of contents placeholder
         story.append(Paragraph("Table of Contents", self.styles['SectionHeading']))
         story.append(Spacer(1, 0.25*inch))
         
-        # Generate TOC entries
+        # Generate TOC entries with special highlighting for AI compliance
         toc_entries = []
         for i, section in enumerate(policy_data.get('sections', []), 1):
-            toc_entries.append(
-                Paragraph(f"{i}. {section['title']}", self.styles['BodyTextJustified'])
-            )
+            section_title = section['title']
+            if self._is_ai_compliance_section(section_title):
+                # Highlight AI compliance sections in TOC
+                toc_entries.append(
+                    Paragraph(
+                        f"<font color='#2980b9'><b>{i}. {section_title} [AI Compliance]</b></font>",
+                        self.styles['BodyTextJustified']
+                    )
+                )
+            else:
+                toc_entries.append(
+                    Paragraph(f"{i}. {section_title}", self.styles['BodyTextJustified'])
+                )
         
         story.extend(toc_entries)
         story.append(PageBreak())
         
         # Add policy sections with proper formatting
         for i, section in enumerate(policy_data.get('sections', []), 1):
-            # Section heading
+            section_title = section['title']
+            is_ai_compliance = self._is_ai_compliance_section(section_title)
+            
+            # Add special notice before AI compliance sections
+            if is_ai_compliance:
+                story.append(Paragraph(
+                    "<b>AI COMPLIANCE SECTION</b>",
+                    self.styles['ComplianceNotice']
+                ))
+                story.append(Spacer(1, 0.1*inch))
+            
+            # Section heading with appropriate style
+            heading_style = 'AIComplianceHeading' if is_ai_compliance else 'SectionHeading'
             story.append(KeepTogether([
-                Paragraph(f"{i}. {section['title']}", self.styles['SectionHeading']),
+                Paragraph(f"{i}. {section_title}", self.styles[heading_style]),
                 Spacer(1, 0.1*inch)
             ]))
             
             # Section content with proper text wrapping
             content = self._wrap_text(section.get('content', ''))
+            body_style = 'AIComplianceBody' if is_ai_compliance else 'BodyTextJustified'
             
             # Split content into paragraphs
             paragraphs = content.split('\n\n')
@@ -231,7 +321,7 @@ class EnhancedPDFGenerator:
                         # Regular paragraph
                         story.append(Paragraph(
                             para.strip(),
-                            self.styles['BodyTextJustified']
+                            self.styles[body_style]
                         ))
                     
                     story.append(Spacer(1, 0.1*inch))
@@ -251,15 +341,56 @@ class EnhancedPDFGenerator:
                 
                 for para in sub_paragraphs:
                     if para.strip():
-                        story.append(Paragraph(
-                            para.strip(),
-                            self.styles['BodyTextJustified']
-                        ))
+                        # Check for numbered lists (e.g., "(1) Item")
+                        if para.strip().startswith('(') and ')' in para[:4]:
+                            # Handle numbered lists
+                            items = para.split(';')
+                            for item in items:
+                                if item.strip():
+                                    story.append(Paragraph(
+                                        item.strip(),
+                                        self.styles['BulletList']
+                                    ))
+                        else:
+                            story.append(Paragraph(
+                                para.strip(),
+                                self.styles[body_style] if is_ai_compliance else self.styles['BodyTextJustified']
+                            ))
                         story.append(Spacer(1, 0.1*inch))
+            
+            # Add visual separator after AI compliance sections
+            if is_ai_compliance:
+                story.append(Spacer(1, 0.2*inch))
+                # Add a subtle line separator
+                separator_data = [['']]
+                separator_table = Table(separator_data, colWidths=[6.5*inch])
+                separator_table.setStyle(TableStyle([
+                    ('LINEABOVE', (0, 0), (-1, 0), 1, colors.HexColor('#2980b9')),
+                ]))
+                story.append(separator_table)
+                story.append(Spacer(1, 0.2*inch))
             
             # Add page break after major sections (except last)
             if i < len(policy_data.get('sections', [])):
                 story.append(PageBreak())
+        
+        # Add compliance summary at the end if AI compliance sections exist
+        if has_ai_compliance:
+            story.append(PageBreak())
+            story.append(Paragraph("AI Compliance Summary", self.styles['SectionHeading']))
+            story.append(Spacer(1, 0.25*inch))
+            
+            summary_text = """This policy incorporates comprehensive AI compliance measures including:
+            
+            <b>Transparency Requirements:</b> Clear documentation and disclosure of AI usage in all decision-making processes affecting stakeholders.
+            
+            <b>Bias Prevention:</b> Systematic testing and monitoring to ensure fair and equitable AI outcomes across all demographic groups.
+            
+            <b>Audit Trail Standards:</b> Comprehensive logging and retention of all AI interactions to enable accountability and regulatory compliance.
+            
+            These measures ensure responsible AI deployment aligned with emerging regulations and industry best practices."""
+            
+            story.append(Paragraph(summary_text, self.styles['BodyTextJustified']))
         
         # Build PDF with page number callback
         doc.build(story, onFirstPage=self._add_page_numbers, onLaterPages=self._add_page_numbers)

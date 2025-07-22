@@ -394,6 +394,61 @@ Continuous learning opportunities keep employees current with AI developments. Q
                             "content": f"""Multiple support channels ensure employees can get help when needed: (1) Self-Service - Comprehensive wiki with searchable articles, video tutorials, and template library available 24/7; (2) Peer Support - AI Users group on internal social platform for community assistance and best practice sharing; (3) IT Helpdesk - Technical support via ticketing system with 4-hour response SLA for standard issues; (4) AI Center of Excellence - Strategic guidance and complex use case support with 24-hour response time; (5) Emergency Hotline - For security incidents or critical issues requiring immediate assistance; (6) Manager Escalation - For policy clarifications or exception requests requiring management approval. Support requests are tracked to identify common issues and improve training materials. The AI Governance Committee reviews support metrics monthly to ensure adequate resources and identify improvement opportunities. Employees providing exceptional peer support are recognized through the company recognition program."""
                         }
                     ]
+                },
+                # New AI Compliance Sections (10, 11, 12)
+                {
+                    "title": "AI Transparency Requirements",
+                    "content": f"""Transparency in AI usage is fundamental to maintaining trust with stakeholders and ensuring compliance with emerging regulations. At {company_name}, we commit to clear disclosure of AI involvement in decisions and content creation that materially affects employees, customers, partners, or the public. This transparency extends beyond simple notification to include meaningful information about how AI systems contribute to outcomes. All AI-assisted decisions must be documented with sufficient detail to enable review, audit, and explanation when required by law or company policy.
+
+The principle of AI transparency requires that affected individuals understand when and how AI influences decisions about them. This includes recruitment screening, performance evaluations, customer service interactions, credit decisions, pricing determinations, and any automated processing of personal data. Employees must maintain comprehensive records of AI system inputs, processing logic, outputs, and human oversight applied. These records must be retained according to our data retention policies and made available for regulatory inspection or individual requests for explanation.
+
+Industry-specific transparency requirements add additional obligations based on our operation in the {industry} sector. Regulatory bodies increasingly mandate specific disclosures for AI use in sensitive contexts. Employees must stay current with evolving transparency requirements through regular training and compliance updates. When implementing new AI use cases, a transparency impact assessment must be completed to identify disclosure obligations and design appropriate communication strategies. Failure to maintain proper transparency can result in regulatory penalties, legal liability, and severe reputational damage.""",
+                    "subsections": [
+                        {
+                            "title": "General Transparency Principles",
+                            "content": f"""All employees using AI must adhere to these transparency principles: (1) Clear Documentation - Every AI-assisted decision must include documentation of the AI system used, version number, input data, output generated, and human review applied; (2) Stakeholder Disclosure - When AI materially contributes to decisions affecting individuals, appropriate disclosure must be provided before or at the time of the decision; (3) Explainability Records - Maintain sufficient information to explain the logic of AI-assisted decisions in terms understandable to affected parties; (4) Capability Communication - Clearly communicate both the capabilities and limitations of AI systems to prevent unrealistic expectations or over-reliance; (5) Update Notifications - When AI systems are updated or replaced, affected stakeholders must be notified if the changes materially affect outcomes; (6) Opt-Out Provisions - Where legally required or ethically appropriate, provide mechanisms for individuals to opt out of AI-assisted processing; (7) Audit Readiness - All transparency documentation must be organized and readily retrievable for internal audits or regulatory examinations."""
+                        },
+                        {
+                            "title": "Industry-Specific Transparency Requirements",
+                            "content": f"""{self._get_industry_transparency_requirements(industry, industry_template)} Employees must consult with the Compliance team before implementing AI in any context with specific regulatory transparency requirements. Regular updates on industry-specific requirements will be provided through compliance training and policy updates. Documentation templates for common use cases are available on the compliance portal."""
+                        }
+                    ]
+                },
+                {
+                    "title": "AI Bias Prevention Measures",
+                    "content": f"""Preventing bias in AI systems is essential to ensuring fair treatment of all individuals and maintaining {company_name}'s commitment to equality and non-discrimination. AI systems can perpetuate or amplify existing biases present in training data, algorithm design, or implementation choices. All employees involved in AI deployment must actively work to identify, measure, and mitigate potential biases that could disadvantage protected groups or create unfair outcomes. This responsibility extends throughout the AI lifecycle from initial selection through ongoing monitoring.
+
+Bias prevention requires a multi-faceted approach combining technical measures, procedural controls, and cultural awareness. Before deploying any AI system that affects individuals, a bias impact assessment must be completed evaluating potential discriminatory effects across dimensions including race, gender, age, disability status, and other protected characteristics. Testing must use statistically valid methods to detect both direct discrimination and indirect bias through proxy variables. When bias is detected, immediate action is required to either remediate the system or discontinue its use until fairness can be assured.
+
+Regular monitoring of AI systems in production is essential as bias can emerge or evolve over time due to changing data patterns or population shifts. All AI systems affecting individuals must undergo quarterly bias audits with results documented and reviewed by the AI Ethics Committee. Employees must report any suspected bias in AI outputs immediately, even if uncertain. {company_name} maintains a zero-tolerance policy for knowing deployment of biased AI systems. Training on bias recognition and prevention is mandatory for all employees involved in AI system selection, deployment, or monitoring.""",
+                    "subsections": [
+                        {
+                            "title": "Bias Detection and Mitigation Procedures",
+                            "content": f"""Systematic procedures for bias prevention include: (1) Pre-Deployment Testing - All AI systems must undergo comprehensive bias testing across protected categories before production use, using statistical parity, demographic parity, and equalized odds metrics; (2) Training Data Audit - Evaluate training data representativeness and identify potential sources of historical bias that could be perpetuated; (3) Algorithm Assessment - Review algorithm design for features that could enable discrimination, including proxy variables correlated with protected characteristics; (4) Human Oversight Requirements - Implement mandatory human review for AI decisions affecting individuals, with reviewers trained in bias recognition; (5) Continuous Monitoring - Deploy automated monitoring to detect emerging bias patterns in production systems with alerts for statistical anomalies; (6) Regular Audits - Conduct quarterly third-party bias audits for high-risk AI applications with public reporting of results; (7) Feedback Mechanisms - Establish clear channels for stakeholders to report suspected bias with protection from retaliation; (8) Remediation Protocols - When bias is detected, immediately suspend affected functionality and implement corrective measures with retesting before restoration."""
+                        },
+                        {
+                            "title": "Fair AI Implementation Standards",
+                            "content": f"""To ensure fair AI implementation at {company_name}: (1) Diverse Development Teams - AI projects must include diverse perspectives in design and testing phases to identify potential bias blind spots; (2) Representative Data Requirements - Training data must adequately represent all groups who will be affected by the AI system with documented data collection strategies; (3) Transparent Feature Selection - Document and justify all features used in AI models, with specific review of any correlated with protected characteristics; (4) Outcome Testing - Test AI outputs across demographic groups to ensure equitable treatment and investigate any disparities exceeding 5%; (5) Human-Centered Design - Prioritize human dignity and fairness over efficiency when designing AI workflows; (6) Regular Retraining - Update AI models regularly with bias prevention as a key optimization criterion alongside accuracy; (7) Stakeholder Engagement - Include affected communities in AI design and testing processes through advisory panels or focus groups; (8) Documentation Standards - Maintain comprehensive fairness documentation including test results, mitigation efforts, and ongoing monitoring data for all AI systems."""
+                        }
+                    ]
+                },
+                {
+                    "title": "AI Audit Trail Requirements",
+                    "content": f"""Comprehensive audit trails are mandatory for all AI usage at {company_name} to ensure accountability, enable investigation of issues, and demonstrate regulatory compliance. Every interaction with AI systems that processes company data, generates content for business use, or influences business decisions must be logged with sufficient detail to reconstruct the full context of the interaction. These audit trails serve multiple critical purposes including security incident investigation, compliance demonstration, quality assurance, and continuous improvement of AI governance.
+
+Audit trail requirements vary based on the sensitivity and impact of the AI use case. Minimal logging for low-risk internal applications includes timestamp, user identification, AI system used, and general purpose. High-risk applications affecting individuals or processing sensitive data require comprehensive logging of all inputs, system parameters, outputs, human reviews, and final decisions. Audit logs must be immutable, cryptographically signed where technically feasible, and protected from unauthorized modification or deletion. Retention periods vary by data type and applicable regulations but never less than the minimum specified in our records retention policy.
+
+Access to audit trails must be strictly controlled on a need-to-know basis with all access logged and reviewed. Regular audits of the audit trails themselves ensure completeness, accuracy, and appropriate access controls. Employees must not attempt to circumvent audit trail mechanisms or delete logs outside of approved retention procedures. Any gaps in audit trails discovered during review must be investigated as potential security incidents. The Internal Audit team conducts quarterly assessments of AI audit trail completeness with findings reported to executive management and the Board of Directors.""",
+                    "subsections": [
+                        {
+                            "title": "Detailed Logging Requirements",
+                            "content": f"""All AI interactions must capture the following minimum information: (1) Timestamp - Precise date and time of interaction in UTC with millisecond precision; (2) User Identification - Authenticated user ID, department, and role at time of interaction; (3) AI System Details - Specific tool, version, API endpoint, and configuration parameters used; (4) Input Data - Complete record of prompts, queries, or data submitted to the AI system with data classification tags; (5) Output Data - Full AI system response including confidence scores, alternative outputs, and any error messages; (6) Processing Metadata - Token usage, processing time, model parameters, and any system warnings; (7) Human Actions - Documentation of human review, modifications, approvals, or rejections of AI output; (8) Business Context - Purpose of AI use, associated project or customer, and decision impact level; (9) Data Lineage - Source systems for input data and destination systems for outputs; (10) Compliance Flags - Indicators for interactions involving personal data, regulatory decisions, or high-risk processing. Enhanced logging applies to specific use cases as defined in the AI Risk Matrix."""
+                        },
+                        {
+                            "title": "Retention and Access Controls",
+                            "content": f"""Audit trail retention and access follows these requirements: (1) Retention Periods - {self._get_retention_period(industry_template)} with extensions for legal holds or active investigations; (2) Storage Security - Audit logs must be encrypted at rest using AES-256 or stronger with key management through Hardware Security Modules; (3) Access Controls - Role-based access limited to Security, Compliance, Legal, and authorized auditors with all access logged; (4) Geographic Restrictions - Audit logs must be stored in compliance with data residency requirements and not transferred across borders without approval; (5) Backup Procedures - Daily automated backups with monthly verification of restoration capability and off-site storage; (6) Integrity Protection - Cryptographic hashing of log entries with chain verification to detect tampering; (7) Search Capabilities - Indexed storage enabling rapid search while maintaining access controls and search audit trails; (8) Disposal Procedures - Secure deletion after retention period using DOD 5220.22-M standard with certificates of destruction; (9) Legal Hold Integration - Automatic suspension of deletion for logs subject to litigation holds with notification to Legal department; (10) Regular Reviews - Quarterly access reviews and annual retention policy assessments with updates as regulations evolve."""
+                        }
+                    ]
                 }
             ] + additional_sections  # Add the template-specific sections
         }
@@ -477,7 +532,10 @@ Risk mitigation includes mandatory human-in-the-loop for all decisions affecting
             "Compliance and Regulatory Requirements",
             "Intellectual Property and Attribution",
             "Monitoring and Enforcement",
-            "Training and Support"
+            "Training and Support",
+            "AI Transparency Requirements",
+            "AI Bias Prevention Measures",
+            "AI Audit Trail Requirements"
         ]
         
         # Add industry-specific sections based on template
@@ -524,3 +582,44 @@ Risk mitigation includes mandatory human-in-the-loop for all decisions affecting
             return "Industry-standard compliance requirements apply with regular review for emerging regulations"
         
         return "; ".join(requirements)
+    
+    def _get_industry_transparency_requirements(self, industry: str, industry_template: Optional[Dict]) -> str:
+        """
+        Generate industry-specific transparency requirements for the new AI compliance section.
+        """
+        industry_lower = industry.lower()
+        
+        if "healthcare" in industry_lower or "medical" in industry_lower:
+            return """Healthcare organizations face unique transparency obligations under FDA guidance for AI/ML-based medical devices and clinical decision support systems. All AI systems used in patient care must clearly indicate their role to healthcare providers with prominent disclaimers about limitations. Patient-facing AI applications require clear, understandable disclosures about AI involvement in their care, with opt-out provisions where clinically appropriate. Documentation must enable traceability from AI recommendations to clinical outcomes for quality assurance and regulatory review. HIPAA requirements add complexity to transparency, requiring careful balance between explanation rights and privacy protection."""
+        
+        elif "financial" in industry_lower or "banking" in industry_lower:
+            return """Financial services AI transparency is governed by multiple regulations including FCRA requirements for adverse action notices, ECOA mandates for credit decision explanations, and emerging state laws on algorithmic accountability. When AI influences credit, employment, insurance, or housing decisions, affected individuals must receive specific information about factors contributing to the decision. Model documentation must be maintained to SR 11-7 standards enabling regulatory examination. Robo-advisory services require clear disclosure of AI involvement, limitations, and human oversight availability. Anti-money laundering AI systems must balance transparency with security concerns to avoid enabling circumvention."""
+        
+        elif "insurance" in industry_lower:
+            return """Insurance industry AI transparency centers on underwriting and claims decisions that directly impact policyholders. State insurance regulations increasingly require disclosure when AI influences coverage determination, pricing, or claims outcomes. Actuarial documentation must explain how AI-derived factors contribute to risk assessment and pricing. Policyholders have rights to understand adverse decisions with meaningful explanations beyond statistical correlations. Claims processing AI must maintain transparency while protecting against fraud. Rate filings must include clear explanations of AI model impacts on pricing with justification for any disparate impact across protected categories."""
+        
+        elif "legal" in industry_lower:
+            return """Legal sector AI transparency must balance multiple ethical obligations including client communication, opposing party disclosure, and court requirements. Any AI assistance in legal research, document review, or case strategy must be disclosed to clients with clear explanation of limitations and human oversight. Court filings may require disclosure of AI tool usage particularly for document generation or legal research. Discovery obligations extend to AI system documentation and audit trails. Attorney supervision remains paramount with transparency about which tasks were AI-assisted versus attorney-performed. Privilege considerations complicate transparency requirements necessitating careful documentation practices."""
+        
+        else:
+            return """General transparency requirements mandate clear disclosure when AI materially influences decisions affecting individuals or organizations. This includes recruitment screening, performance evaluation, customer service decisions, and automated content generation. Affected parties must receive meaningful information about AI involvement, not merely notification that AI was used. Explanation must be provided in terms understandable to the intended audience avoiding technical jargon. Documentation must support both individual explanation requests and regulatory examination. Industry associations may provide additional guidance specific to sector practices. Transparency mechanisms must be designed into AI systems from inception rather than added retroactively."""
+    
+    def _get_retention_period(self, industry_template: Optional[Dict]) -> str:
+        """
+        Determine the appropriate retention period based on industry requirements.
+        """
+        if not industry_template:
+            return "Minimum 3 years or as required by applicable regulations"
+        
+        frameworks = industry_template.get("compliance_frameworks", [])
+        
+        if "HIPAA" in frameworks:
+            return "Minimum 6 years per HIPAA requirements"
+        elif "SOX" in frameworks:
+            return "Minimum 7 years per Sarbanes-Oxley requirements"
+        elif "FINRA" in frameworks:
+            return "Minimum 6 years per FINRA requirements"
+        elif "GDPR" in frameworks:
+            return "No longer than necessary per GDPR with defined retention schedules"
+        else:
+            return "Minimum 3 years or as required by applicable regulations"
