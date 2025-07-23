@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Request, HTTPException
+﻿from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
@@ -7,10 +7,16 @@ from pydantic import BaseModel
 from typing import List, Optional
 
 # Import your routes
-from app.api import policies
+from app.api import policies, partners  # Added partners
 
 # Load environment variables
 load_dotenv()
+
+# Configure logging
+import logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+logger.info(f"STRIPE_SECRET_KEY loaded: {bool(os.getenv('STRIPE_SECRET_KEY'))}")
 
 # Create request models
 class PolicyRequest(BaseModel):
@@ -43,6 +49,7 @@ app.add_middleware(
 
 # Include API routers
 app.include_router(policies.router)
+app.include_router(partners.router)  # Added partner routes
 
 # Root endpoint
 @app.get("/")
@@ -52,6 +59,8 @@ async def root():
         "version": "2.0.0",
         "endpoints": {
             "generate_policy": "/api/policies/generate",
+            "partner_register": "/api/partners/register",
+            "partner_dashboard": "/api/partners/dashboard",
             "health": "/health"
         }
     }
@@ -64,6 +73,46 @@ async def health_check():
         "service": "CompliGenie API",
         "timestamp": os.popen('date').read().strip()
     }
+
+# Stripe webhook endpoint
+@app.post("/webhooks/stripe")
+async def stripe_webhook(request: Request):
+    """Handle Stripe webhooks for payment and account updates"""
+    from app.services.stripe_service import StripeConnectService
+    from app.services.partner_store import partner_store
+    
+    payload = await request.body()
+    sig_header = request.headers.get('stripe-signature')
+    
+    try:
+        stripe_service = StripeConnectService()
+        event = await stripe_service.verify_webhook(payload, sig_header)
+        
+        # Handle different event types
+        if event['type'] == 'account.updated':
+            # Partner completed onboarding
+            account_id = event['data']['object']['id']
+            charges_enabled = event['data']['object']['charges_enabled']
+            
+            # Find partner by stripe account ID and update
+            for partner in partner_store.list_all():
+                if partner.stripe_account_id == account_id:
+                    partner.stripe_onboarding_completed = charges_enabled
+                    partner_store.update(partner.id, partner.dict())
+                    break
+                    
+        elif event['type'] == 'payment_intent.succeeded':
+            # Payment successful - already handled by transfer_data
+            pass
+            
+        elif event['type'] == 'transfer.created':
+            # Transfer to partner created
+            pass
+            
+        return {"status": "success"}
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 # Global exception handler
 @app.exception_handler(Exception)
@@ -79,14 +128,15 @@ async def global_exception_handler(request: Request, exc: Exception):
 # Startup event
 @app.on_event("startup")
 async def startup_event():
-    print("🚀 CompliGenie API starting up...")
-    print(f"📧 Email service: {'Enabled' if os.getenv('SENDGRID_API_KEY') else 'Disabled'}")
-    print("✅ Ready to serve requests")
+    print("ðŸš€ CompliGenie API starting up...")
+    print(f"ðŸ“§ Email service: {'Enabled' if os.getenv('SENDGRID_API_KEY') else 'Disabled'}")
+    print(f"ðŸ’³ Stripe Connect: {'Enabled' if os.getenv('STRIPE_SECRET_KEY') else 'Test Mode'}")
+    print("âœ… Ready to serve requests")
 
 # Shutdown event
 @app.on_event("shutdown")
 async def shutdown_event():
-    print("👋 CompliGenie API shutting down...")
+    print("ðŸ‘‹ CompliGenie API shutting down...")
 
 # Legacy endpoint for backward compatibility (remove later)
 @app.post("/generate")

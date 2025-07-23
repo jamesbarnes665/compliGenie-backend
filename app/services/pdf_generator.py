@@ -1,152 +1,64 @@
-# app/services/pdf_generator.py
+﻿# compligenie-backend/app/services/pdf_generator.py
 
-import os
+from typing import Dict, Any
+import base64
 from datetime import datetime
-from reportlab.lib.pagesizes import letter
-from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-from reportlab.lib.units import inch
-from reportlab.platypus import (
-    SimpleDocTemplate, 
-    Paragraph, 
-    Spacer, 
-    PageBreak,
-    Table,
-    TableStyle,
-    KeepTogether
-)
-from reportlab.lib.enums import TA_JUSTIFY, TA_CENTER
-from reportlab.lib import colors
-from io import BytesIO
-import textwrap
-from typing import Dict, Optional
 
-class EnhancedPDFGenerator:
-    """Enhanced PDF generator with proper formatting"""
+class PDFGenerator:
+    """Simple PDF generator for policies"""
     
     def __init__(self):
-        self.styles = getSampleStyleSheet()
-        self._create_custom_styles()
-        
-    def _create_custom_styles(self):
-        """Create custom styles for the document"""
-        # Title style
-        self.styles.add(ParagraphStyle(
-            name='CustomTitle',
-            parent=self.styles['Title'],
-            fontSize=24,
-            textColor=colors.HexColor('#2c3e50'),
-            spaceAfter=30,
-            alignment=TA_CENTER
-        ))
-        
-        # Section heading style
-        self.styles.add(ParagraphStyle(
-            name='SectionHeading',
-            parent=self.styles['Heading1'],
-            fontSize=16,
-            textColor=colors.HexColor('#34495e'),
-            spaceBefore=24,
-            spaceAfter=12
-        ))
-        
-        # Body text style
-        self.styles.add(ParagraphStyle(
-            name='BodyTextJustified',
-            parent=self.styles['BodyText'],
-            fontSize=11,
-            alignment=TA_JUSTIFY,
-            spaceBefore=6,
-            spaceAfter=6,
-            leading=16
-        ))
-
-    def generate_policy_pdf(self, policy_data: Dict, partner_branding: Optional[Dict] = None) -> BytesIO:
-        """Generate PDF from policy content"""
-        buffer = BytesIO()
-        
-        # Create document
-        doc = SimpleDocTemplate(
-            buffer,
-            pagesize=letter,
-            rightMargin=1*inch,
-            leftMargin=1*inch,
-            topMargin=1*inch,
-            bottomMargin=1*inch
-        )
-        
-        story = []
-        
-        # Apply partner branding if available
-        primary_color = '#2c3e50'
-        if partner_branding and partner_branding.get('primaryColor'):
-            primary_color = partner_branding['primaryColor']
-            self.styles['CustomTitle'].textColor = colors.HexColor(primary_color)
-            self.styles['SectionHeading'].textColor = colors.HexColor(primary_color)
-        
-        # Title
-        story.append(Paragraph(
-            policy_data.get('title', 'AI Usage Policy'),
-            self.styles['CustomTitle']
-        ))
-        story.append(Spacer(1, 0.5*inch))
-        
-        # Company info
-        story.append(Paragraph(
-            f"<b>Company:</b> {policy_data.get('company_name', 'N/A')}",
-            self.styles['BodyTextJustified']
-        ))
-        story.append(Paragraph(
-            f"<b>Industry:</b> {policy_data.get('industry', 'N/A')}",
-            self.styles['BodyTextJustified']
-        ))
-        story.append(Paragraph(
-            f"<b>State:</b> {policy_data.get('state', 'N/A')}",
-            self.styles['BodyTextJustified']
-        ))
-        story.append(Paragraph(
-            f"<b>Effective Date:</b> {datetime.now().strftime('%B %d, %Y')}",
-            self.styles['BodyTextJustified']
-        ))
-        
-        story.append(PageBreak())
-        
-        # Sections
-        sections = policy_data.get('sections', [])
-        for i, section in enumerate(sections, 1):
-            # Section heading
-            story.append(Paragraph(
-                f"{i}. {section.get('title', 'Section')}",
-                self.styles['SectionHeading']
-            ))
+        pass
+    
+    def generate_pdf(self, policy_content: Dict[str, Any]) -> bytes:
+        """
+        Generate a PDF from policy content
+        For now, returns a simple HTML representation
+        In production, you would use reportlab or weasyprint
+        """
+        # Simple HTML template for now
+        html_content = f"""
+        <html>
+        <head>
+            <title>{policy_content.get('policy_type', 'AI Policy')}</title>
+            <style>
+                body {{ font-family: Arial, sans-serif; margin: 40px; }}
+                h1 {{ color: #333; }}
+                h2 {{ color: #666; }}
+                .section {{ margin-bottom: 30px; }}
+                .footer {{ margin-top: 50px; font-size: 12px; color: #999; }}
+            </style>
+        </head>
+        <body>
+            <h1>{policy_content.get('policy_type', 'AI Usage Policy')}</h1>
+            <p>Generated on: {datetime.utcnow().strftime('%B %d, %Y')}</p>
             
-            # Section content
-            content = section.get('content', '')
-            if content:
-                # Wrap text properly
-                wrapped_content = textwrap.fill(content, width=80)
-                story.append(Paragraph(
-                    wrapped_content,
-                    self.styles['BodyTextJustified']
-                ))
+            <div class="section">
+                <h2>Overview</h2>
+                <p>{policy_content.get('overview', 'This policy governs the use of AI tools within the organization.')}</p>
+            </div>
             
-            story.append(Spacer(1, 0.25*inch))
+            <div class="section">
+                <h2>Guidelines</h2>
+                <p>{policy_content.get('guidelines', 'All employees must follow these AI usage guidelines.')}</p>
+            </div>
             
-            # Subsections
-            for j, subsection in enumerate(section.get('subsections', []), 1):
-                story.append(Paragraph(
-                    f"{i}.{j} {subsection.get('title', 'Subsection')}",
-                    self.styles['BodyTextJustified']
-                ))
-                sub_content = subsection.get('content', '')
-                if sub_content:
-                    wrapped_sub = textwrap.fill(sub_content, width=80)
-                    story.append(Paragraph(
-                        wrapped_sub,
-                        self.styles['BodyTextJustified']
-                    ))
-                story.append(Spacer(1, 0.15*inch))
+            <div class="section">
+                <h2>Compliance Requirements</h2>
+                <p>{policy_content.get('compliance', 'This policy ensures compliance with applicable regulations.')}</p>
+            </div>
+            
+            <div class="footer">
+                <p>Generated by CompliGenie - AI Compliance Policy Generator</p>
+            </div>
+        </body>
+        </html>
+        """
         
-        # Build PDF
-        doc.build(story)
-        buffer.seek(0)
-        return buffer
+        # Return as bytes (in production, this would be actual PDF bytes)
+        return html_content.encode('utf-8')
+    
+    def generate_pdf_base64(self, policy_content: Dict[str, Any]) -> str:
+        """Generate PDF and return as base64 string"""
+        pdf_bytes = self.generate_pdf(policy_content)
+        return base64.b64encode(pdf_bytes).decode('utf-8')
