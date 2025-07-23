@@ -1,6 +1,6 @@
-# compligenie-backend/app/models/partner.py
+﻿# compligenie-backend/app/models/partner.py
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 from typing import Optional, Dict, List
 from datetime import datetime
 from enum import Enum
@@ -11,16 +11,29 @@ class PartnerStatus(str, Enum):
     SUSPENDED = "suspended"
 
 class PartnerTier(str, Enum):
-    STARTER = "starter"     # 0-50 policies/month, 20% revenue share
-    GROWTH = "growth"       # 51-200 policies/month, 30% revenue share
-    ENTERPRISE = "enterprise"  # 200+ policies/month, 40% revenue share
+    STARTER = "starter"
+    GROWTH = "growth"
+    ENTERPRISE = "enterprise"
+
+class PartnerBranding(BaseModel):
+    """Partner branding configuration"""
+    logo_url: Optional[str] = None
+    company_name: str
+    primary_color: str = "#1a365d"  # Default blue
+    secondary_color: str = "#2563eb"
+    contact_phone: Optional[str] = None
+    contact_email: Optional[str] = None
+    contact_website: Optional[str] = None
+    powered_by_text: Optional[str] = None
+    show_compligenie_branding: bool = True
+    footer_text: Optional[str] = None
 
 class Partner(BaseModel):
     id: str
     company_name: str
     email: EmailStr
     contact_name: str
-    partner_type: str  # legal, hr, insurance, consulting
+    partner_type: str
     
     # Stripe Connect fields
     stripe_account_id: Optional[str] = None
@@ -44,12 +57,13 @@ class Partner(BaseModel):
     
     # API access
     api_key: str
-    api_secret: str
+    api_secret: Optional[str] = None
     
-    # Branding
-    branding: Optional[Dict] = None
+    # Branding - NEW!
+    branding: Optional[PartnerBranding] = None
     
-    created_at: datetime
+    # Timestamps
+    created_at: datetime = Field(default_factory=datetime.utcnow)
     updated_at: Optional[datetime] = None
 
 class PolicyGeneration(BaseModel):
@@ -59,18 +73,18 @@ class PolicyGeneration(BaseModel):
     company_name: str
     industry: str
     employee_count: int
-    base_price: float = 10.0  # $10 per policy
-    partner_revenue: float  # Calculated based on revenue share
+    base_price: float = 10.0
+    partner_revenue: float
     stripe_payment_intent_id: Optional[str] = None
-    status: str = "pending"  # pending, completed, failed
-    created_at: datetime
+    status: str = "pending"
+    created_at: datetime = Field(default_factory=datetime.utcnow)
 
 class PartnerEarnings(BaseModel):
     partner_id: str
-    period: str  # "2024-01" for monthly
+    period: str
     policies_count: int
     gross_revenue: float
     partner_share: float
-    status: str = "pending"  # pending, paid, processing
+    status: str = "pending"
     stripe_transfer_id: Optional[str] = None
-    created_at: datetime
+    created_at: datetime = Field(default_factory=datetime.utcnow)

@@ -87,7 +87,11 @@ async def generate_policy(
             print(f"Revenue tracked: ${base_price}, Partner share: ${partner_revenue}")
         
         # Generate PDF
-        pdf_content = pdf_generator.generate_pdf(policy_content)
+                # Generate PDF with partner branding
+        if partner and partner.branding:
+            pdf_content = pdf_generator.generate_pdf(policy_content, partner.branding)
+        else:
+            pdf_content = pdf_generator.generate_pdf(policy_content)
         
         return {
             "policy_id": policy_id,
@@ -107,3 +111,4 @@ async def download_policy(policy_id: str):
     """Download policy as PDF"""
     # This would retrieve and return the PDF
     return {"message": "PDF download endpoint", "policy_id": policy_id}
+
