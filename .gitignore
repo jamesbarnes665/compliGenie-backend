@@ -27,3 +27,13 @@ uploaded_docs/
 uploaded_files/
 .env
 *.pdf
+
+# Partner data store
+partners.json
+data/
+
+# Test scripts
+test_*.py
+
+# Environment files
+.env
