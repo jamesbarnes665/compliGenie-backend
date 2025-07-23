@@ -1,121 +1,114 @@
-# backend/app/api/policies.py
+﻿# compligenie-backend/app/api/policies.py
 
-from fastapi import APIRouter, HTTPException, Header
-from fastapi.responses import StreamingResponse
-from pydantic import BaseModel
-from typing import List, Optional, Dict
-import traceback
+from fastapi import APIRouter, HTTPException, Header, Depends
+from typing import Optional, Dict, List
 from datetime import datetime
-
-# Import your services
-from app.services.pdf_generator import EnhancedPDFGenerator
+import secrets
+from pydantic import BaseModel
+from app.models.partner import PolicyGeneration, PartnerTier
 from app.services.policy_generator import PolicyGenerator
+from app.services.pdf_generator import PDFGenerator
+from app.services.partner_store import partner_store
 
-# Create the router
-router = APIRouter(prefix="/api/policies", tags=["policies"])
-
-# Request models
-class PolicyGenerationRequest(BaseModel):
+# Define PolicyRequest here if it's not in models
+class PolicyRequest(BaseModel):
     company_name: str
     industry: str
     state: str
     ai_tools: List[str]
     employee_count: int
-    company_size: Optional[str] = None
-    data_types: Optional[List[str]] = None
-    compliance_requirements: Optional[List[str]] = None
-    partner_id: Optional[str] = None
-    partner_branding: Optional[Dict] = None
-    template_customizations: Optional[Dict] = None
+
+router = APIRouter(prefix="/api/policies", tags=["policies"])
+policy_generator = PolicyGenerator()
+pdf_generator = PDFGenerator()
+
+# Dependency to get current partner from API key (optional)
+async def get_optional_partner(x_api_key: Optional[str] = Header(None)):
+    if x_api_key:
+        partner = partner_store.get_by_api_key(x_api_key)
+        return partner
+    return None
 
 @router.post("/generate")
 async def generate_policy(
-    request: PolicyGenerationRequest,
-    x_partner_id: Optional[str] = Header(None)
+    request: PolicyRequest,
+    partner = Depends(get_optional_partner)
 ):
-    """Generate AI policy with industry-specific templates"""
+    """Generate an AI compliance policy"""
     try:
-        # Get partner context from headers
-        partner_id = x_partner_id or request.partner_id
+        # Generate the policy
+        policy_content = policy_generator.generate_policy(request.dict())
         
-        print(f"Generating policy for {request.company_name} in {request.industry}")
-        if partner_id:
-            print(f"Partner ID: {partner_id}")
+        # Create policy ID
+        policy_id = f"policy_{secrets.token_urlsafe(8)}"
         
-        # Generate policy content
-        policy_generator = PolicyGenerator()
-        policy_content = await policy_generator.generate(
-            company_name=request.company_name,
-            industry=request.industry,
-            ai_tools=request.ai_tools,
-            employee_count=request.employee_count,
-            industry_template={}
-        )
-        
-        # Add state to policy content
-        policy_content["state"] = request.state
-        
-        # Create PDF
-        pdf_generator = EnhancedPDFGenerator()
-        
-        # Apply partner branding if available
-        partner_branding = request.partner_branding
-        if partner_id and not partner_branding:
-            # Default partner branding
-            partner_branding = {
-                "primaryColor": "#007bff",
-                "secondaryColor": "#6c757d"
-            }
+        # Track partner revenue if API key was provided
+        if partner:
+            # Base price for policy generation
+            base_price = 10.0
+            
+            # Calculate partner revenue based on tier
+            partner_revenue = base_price * (partner.revenue_share_percentage / 100)
+            
+            # Create policy generation record
+            policy_gen = PolicyGeneration(
+                id=f"polgen_{secrets.token_urlsafe(8)}",
+                partner_id=partner.id,
+                policy_id=policy_id,
+                company_name=request.company_name,
+                industry=request.industry,
+                employee_count=request.employee_count,
+                base_price=base_price,
+                partner_revenue=partner_revenue,
+                created_at=datetime.utcnow()
+            )
+            
+            # Update partner stats
+            partner.policies_generated_total += 1
+            partner.policies_generated_monthly += 1
+            partner.total_revenue += base_price
+            partner.monthly_revenue += base_price
+            partner.pending_payout += partner_revenue
+            partner.last_policy_date = datetime.utcnow()
+            
+            # Check for tier upgrade
+            if partner.policies_generated_monthly > 200 and partner.tier != PartnerTier.ENTERPRISE:
+                partner.tier = PartnerTier.ENTERPRISE
+                partner.revenue_share_percentage = 40
+            elif partner.policies_generated_monthly > 50 and partner.tier == PartnerTier.STARTER:
+                partner.tier = PartnerTier.GROWTH
+                partner.revenue_share_percentage = 30
+            
+            # Save updates
+            partner_store.update(partner.id, partner.dict())
+            
+            # Log the revenue tracking
+            print(f"Policy generated by partner {partner.id}")
+            print(f"Revenue tracked: ${base_price}, Partner share: ${partner_revenue}")
         
         # Generate PDF
-        pdf_buffer = pdf_generator.generate_policy_pdf(
-            policy_content,
-            partner_branding=partner_branding
-        )
+                # Generate PDF with partner branding
+        if partner and partner.branding:
+            pdf_content = pdf_generator.generate_pdf(policy_content, partner.branding)
+        else:
+            pdf_content = pdf_generator.generate_pdf(policy_content)
         
-        # Return PDF as streaming response
-        return StreamingResponse(
-            pdf_buffer,
-            media_type="application/pdf",
-            headers={
-                "Content-Disposition": f"attachment; filename=ai_policy_{request.company_name.replace(' ', '_')}.pdf"
-            }
-        )
-        
-    except Exception as e:
-        print(f"Error generating policy: {str(e)}")
-        print(traceback.format_exc())
-        raise HTTPException(status_code=500, detail=str(e))
-
-@router.get("/compliance-requirements")
-async def get_compliance_requirements(industry: str, state: str):
-    """Get compliance requirements for industry and state"""
-    try:
         return {
-            "industry": industry,
-            "state": state,
-            "requirements": [
-                "GDPR Compliance",
-                "CCPA Compliance",
-                "Industry Standards"
-            ]
+            "policy_id": policy_id,
+            "policy_type": policy_content.get("policy_type", "AI Usage Policy"),
+            "company_name": request.company_name,
+            "generated_at": datetime.utcnow().isoformat(),
+            "policy_content": policy_content,
+            "pdf_url": f"/api/policies/{policy_id}/download",
+            "partner_tracked": partner is not None
         }
+        
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@router.get("/test")
-async def test_endpoint():
-    """Test endpoint to verify API is working"""
-    return {
-        "message": "Policies API is working",
-        "version": "1.0"
-    }
+@router.get("/{policy_id}/download")
+async def download_policy(policy_id: str):
+    """Download policy as PDF"""
+    # This would retrieve and return the PDF
+    return {"message": "PDF download endpoint", "policy_id": policy_id}
 
-@router.get("/test-partner/{partner_id}")
-async def test_partner_endpoint(partner_id: str):
-    """Test partner endpoint"""
-    return {
-        "message": "Partner endpoint working",
-        "partner_id": partner_id,
-        "backend": "Python"
-    }
