@@ -227,3 +227,71 @@ async def create_test_charge():
         }
     except stripe.error.StripeError as e:
         raise HTTPException(status_code=400, detail=str(e))
+
+@router.put("/branding")
+async def update_partner_branding(
+    branding_data: Dict,
+    partner: Partner = Depends(get_current_partner)
+):
+    """Update partner branding settings"""
+    try:
+        # Create branding object
+        from app.models.partner import PartnerBranding
+        
+        branding = PartnerBranding(
+            logo_url=branding_data.get("logo_url"),
+            company_name=branding_data.get("company_name", partner.company_name),
+            primary_color=branding_data.get("primary_color", "#1a365d"),
+            secondary_color=branding_data.get("secondary_color", "#2563eb"),
+            contact_phone=branding_data.get("contact_phone"),
+            contact_email=branding_data.get("contact_email"),
+            contact_website=branding_data.get("contact_website"),
+            powered_by_text=branding_data.get("powered_by_text", f"Powered by {partner.company_name}"),
+            show_compligenie_branding=branding_data.get("show_compligenie_branding", True),
+            footer_text=branding_data.get("footer_text")
+        )
+        
+        # Update partner branding
+        partner.branding = branding
+        partner.updated_at = datetime.utcnow()
+        partner_store.update(partner.id, partner.dict())
+        
+        return {
+            "success": True,
+            "message": "Branding updated successfully",
+            "branding": branding.dict()
+        }
+        
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/branding")
+async def get_partner_branding(partner: Partner = Depends(get_current_partner)):
+    """Get current partner branding settings"""
+    if partner.branding:
+        return partner.branding.dict()
+    else:
+        # Return default branding
+        return {
+            "company_name": partner.company_name,
+            "primary_color": "#1a365d",
+            "secondary_color": "#2563eb",
+            "powered_by_text": f"Powered by {partner.company_name}",
+            "show_compligenie_branding": True
+        }
+
+@router.post("/branding/logo")
+async def upload_partner_logo(
+    partner: Partner = Depends(get_current_partner)
+):
+    """Upload partner logo (returns URL for now - implement S3 later)"""
+    # For MVP, we'll use a placeholder
+    # In production, this would upload to S3/Cloudinary
+    
+    logo_url = f"https://ui-avatars.com/api/?name={partner.company_name}&size=200&background=random"
+    
+    return {
+        "success": True,
+        "logo_url": logo_url,
+        "message": "Logo uploaded successfully (using placeholder for MVP)"
+    }
