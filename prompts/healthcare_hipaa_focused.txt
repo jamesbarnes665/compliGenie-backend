@@ -1,0 +1,42 @@
+﻿Generate a HIPAA-compliant AI governance policy for healthcare organizations:
+
+1. EXECUTIVE SUMMARY & HIPAA ALIGNMENT (1 page)
+   - AI governance objectives in healthcare
+   - HIPAA Privacy Rule considerations
+   - HIPAA Security Rule requirements
+   - Leadership accountability structure
+
+2. PROTECTED HEALTH INFORMATION (PHI) & AI (2.5 pages)
+   - PHI definition in AI context
+   - Approved AI uses with PHI
+   - Prohibited AI applications
+   - De-identification requirements before AI processing
+   - Specific examples: clinical notes, imaging, patient communications
+
+3. AI TOOL AUTHORIZATION & BAA REQUIREMENTS (2 pages)
+   - Approved healthcare AI tools
+   - Business Associate Agreement requirements
+   - Vendor assessment criteria
+   - Tool-specific protocols
+
+4. SECURITY SAFEGUARDS FOR AI SYSTEMS (2 pages)
+   - Access controls for AI platforms
+   - Audit trails for AI interactions
+   - Encryption requirements
+   - Incident response for AI breaches
+
+5. PATIENT RIGHTS & AI TRANSPARENCY (1.5 pages)
+   - Patient notification requirements
+   - Right to opt-out procedures
+   - AI decision explanations
+   - Complaint procedures
+
+6. WORKFORCE TRAINING & COMPLIANCE (1 page)
+   - Role-based AI training
+   - Annual certification requirements
+   - Violation penalties
+   - Update procedures
+
+Healthcare Setting: {PRACTICE_TYPE}
+Company Size: {COMPANY_SIZE}
+AI Tools: {AI_TOOLS_LIST}

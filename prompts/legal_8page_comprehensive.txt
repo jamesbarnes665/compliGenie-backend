@@ -1,0 +1,34 @@
+﻿Generate a comprehensive AI governance policy for a law firm with the following structure:
+
+1. EXECUTIVE SUMMARY (1 page)
+   - Purpose and scope of AI governance
+   - Key compliance requirements
+   - Leadership commitment statement
+
+2. AI USAGE GUIDELINES (2 pages)
+   - Approved AI tools and use cases
+   - Client confidentiality protocols
+   - Ethical considerations for legal practice
+   - Specific examples: contract review, legal research, document drafting
+
+3. DATA PROTECTION & PRIVACY (2 pages)
+   - Client data handling in AI systems
+   - Attorney-client privilege preservation
+   - Cross-border data considerations
+   - Incident response procedures
+
+4. COMPLIANCE & REGULATORY (1.5 pages)
+   - Bar association AI guidelines
+   - Jurisdiction-specific requirements
+   - Audit trail requirements
+   - Reporting obligations
+
+5. TRAINING & ACCOUNTABILITY (1.5 pages)
+   - Mandatory AI training programs
+   - Role-specific responsibilities
+   - Violation consequences
+   - Update procedures
+
+Include specific references to: {AI_TOOLS_LIST}
+Company size: {COMPANY_SIZE}
+Jurisdictions: {JURISDICTIONS}
