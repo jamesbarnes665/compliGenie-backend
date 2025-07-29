@@ -1,4 +1,4 @@
-using CompliGenie.Data;
+﻿using CompliGenie.Data;
 using CompliGenie.Middleware;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +12,7 @@ builder.Services.AddSwaggerGen();
 // Add Entity Framework with SQLite
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=CompliGenie.db"));
+
 
 var app = builder.Build();
 
@@ -41,3 +42,7 @@ app.Run();
 
 // Make Program accessible to tests
 public partial class Program { }
+
+
+
+
