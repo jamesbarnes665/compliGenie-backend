@@ -1,5 +1,6 @@
-﻿using CompliGenie.Data;
-using CompliGenie.Middleware;
+﻿using CompliGenie.Middleware;
+using CompliGenie.Services;
+using CompliGenie.Services.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,8 +14,18 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlite("Data Source=CompliGenie.db"));
 
+// Multi-Tenant Foundation Services
+builder.Services.AddScoped<CompliGenie.Services.Interfaces.ITenantRepository, MockTenantRepository>();
+builder.Services.AddScoped<CompliGenie.Services.Interfaces.ITenantService, MockTenantService>();
+builder.Services.AddScoped<CompliGenie.Services.Interfaces.IStripeService, MockStripeService>();
+builder.Services.AddScoped<CompliGenie.Services.Interfaces.IEmailService, MockEmailService>();
 
 var app = builder.Build();
+
+// Add tenant middleware for all API routes except registration
+app.UseWhen(context => context.Request.Path.StartsWithSegments("/api") && 
+                       !context.Request.Path.StartsWithSegments("/api/partners/register"),
+            appBuilder => appBuilder.UseTenantMiddleware());
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -24,25 +35,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
-// Add tenant middleware before authorization
-app.UseTenantMiddleware();
-
 app.UseAuthorization();
 app.MapControllers();
-
-// Create database on startup
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.EnsureCreated();
-}
 
 app.Run();
 
 // Make Program accessible to tests
 public partial class Program { }
-
-
-
-

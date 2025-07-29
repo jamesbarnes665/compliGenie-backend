@@ -1,89 +1,50 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Security.Cryptography;
+using System.Text;
 using CompliGenie.Models;
-using Microsoft.Extensions.Logging;
+using CompliGenie.Services.Interfaces;
 
 namespace CompliGenie.Services
 {
     public class MockTenantService : ITenantService
     {
-        private readonly Dictionary<string, Tenant> _tenants = new();
-        private readonly ILogger<MockTenantService> _logger;
+        private readonly ITenantRepository _tenantRepository;
 
-        public MockTenantService(ILogger<MockTenantService> logger)
+        public MockTenantService(ITenantRepository tenantRepository)
         {
-            _logger = logger;
-            InitializeTestTenants();
+            _tenantRepository = tenantRepository;
         }
 
-        public Task<Tenant?> GetByApiKeyAsync(string apiKey)
+        public async Task<Tenant?> GetByApiKeyAsync(string apiKey)
         {
-            if (string.IsNullOrEmpty(apiKey))
-            {
-                return Task.FromResult<Tenant?>(null);
-            }
-
-            // In a real implementation, you would hash the apiKey and compare with ApiKeyHash
-            // For mock, we'll do a simple lookup
-            var tenant = _tenants.Values.FirstOrDefault(t => t.ApiKeyHash == apiKey);
+            // In production, this would query the database
+            // For now, we hash the API key and look it up
+            var apiKeyHash = HashApiKey(apiKey);
             
-            if (tenant != null)
-            {
-                _logger.LogDebug("Found tenant {TenantName} for API key", tenant.Name);
-            }
-            else
-            {
-                _logger.LogDebug("No tenant found for API key");
-            }
-            
-            return Task.FromResult(tenant);
+            // This is a mock implementation - in production this would be a DB query
+            var allTenants = await _tenantRepository.GetAllAsync();
+            return allTenants.FirstOrDefault(t => t.ApiKeyHash == apiKeyHash);
         }
 
-        public void AddTenant(Tenant tenant)
+        public async Task<Tenant?> GetByIdAsync(Guid id)
         {
-            if (tenant == null || string.IsNullOrEmpty(tenant.ApiKeyHash))
-            {
-                throw new ArgumentException("Tenant and API key hash are required");
-            }
-
-            _tenants[tenant.ApiKeyHash] = tenant;
-            _logger.LogInformation("Added test tenant {TenantName}", tenant.Name);
+            return await _tenantRepository.GetByIdAsync(id);
         }
 
-        private void InitializeTestTenants()
+        public async Task<Tenant?> GetBySubdomainAsync(string subdomain)
         {
-            var testTenants = new[]
-            {
-                new Tenant
-                {
-                    Id = Guid.Parse("11111111-1111-1111-1111-111111111111"),
-                    Name = "Demo Legal Platform",
-                    Subdomain = "demo-legal",
-                    ApiKeyHash = "demo-api-key-legal-12345", // In production, this would be hashed
-                    StripeAccountId = "acct_demo_legal",
-                    Settings = "{\"industry\":\"legal\",\"revenueSplit\":0.5,\"isTestAccount\":true}",
-                    CreatedAt = DateTime.UtcNow.AddDays(-30)
-                },
-                new Tenant
-                {
-                    Id = Guid.Parse("22222222-2222-2222-2222-222222222222"),
-                    Name = "Demo Healthcare Platform",
-                    Subdomain = "demo-health",
-                    ApiKeyHash = "demo-api-key-health-67890", // In production, this would be hashed
-                    StripeAccountId = "acct_demo_health",
-                    Settings = "{\"industry\":\"healthcare\",\"revenueSplit\":0.5,\"isTestAccount\":true}",
-                    CreatedAt = DateTime.UtcNow.AddDays(-15)
-                }
-            };
+            return await _tenantRepository.GetBySubdomainAsync(subdomain);
+        }
 
-            foreach (var tenant in testTenants)
-            {
-                _tenants[tenant.ApiKeyHash] = tenant;
-            }
-
-            _logger.LogInformation("Initialized {Count} test tenants", testTenants.Length);
+        private string HashApiKey(string apiKey)
+        {
+            using var sha256 = SHA256.Create();
+            var bytes = Encoding.UTF8.GetBytes(apiKey);
+            var hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
         }
     }
 }
