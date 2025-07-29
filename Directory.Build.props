@@ -1,0 +1,5 @@
+<Project>
+  <PropertyGroup>
+    <DefaultItemExcludes>$(DefaultItemExcludes);temp-verify\**;tests-backup\**;tests-isolated\**</DefaultItemExcludes>
+  </PropertyGroup>
+</Project>
