@@ -44,5 +44,11 @@ namespace CompliGenie.Services
             }
             return Task.FromResult(tenant);
         }
+
+        public Task<List<Tenant>> GetAllAsync()
+        {
+            return Task.FromResult(_tenants.ToList());
+        }
     }
 }
+

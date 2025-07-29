@@ -1,106 +1,48 @@
-using Microsoft.AspNetCore.Http;
-using System;
-using System.Linq;
+﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
-using Microsoft.AspNetCore.Hosting;
-
+using System.Linq;
 using CompliGenie.Services;
-using CompliGenie.Context;
+using CompliGenie.Services.Interfaces;
 
 namespace CompliGenie.Middleware
 {
     public class TenantMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly ILogger<TenantMiddleware> _logger;
 
-        public TenantMiddleware(RequestDelegate next, ILogger<TenantMiddleware> logger)
+        public TenantMiddleware(RequestDelegate next)
         {
-            _next = next ?? throw new ArgumentNullException(nameof(next));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext context, ITenantService tenantService)
         {
-            var startTime = DateTime.UtcNow;
+            var apiKey = context.Request.Headers["X-API-Key"].FirstOrDefault();
+            if (string.IsNullOrEmpty(apiKey))
+            {
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Missing API Key");
+                return;
+            }
             
-            try
+            var tenant = await tenantService.GetByApiKeyAsync(apiKey);
+            if (tenant == null)
             {
-                // Extract API key from headers
-                var apiKey = context.Request.Headers["X-API-Key"].FirstOrDefault();
-                
-                if (string.IsNullOrEmpty(apiKey))
-                {
-                    _logger.LogWarning("Request received without API key from {IpAddress}", 
-                        context.Connection.RemoteIpAddress);
-                    
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\":\"API key required\"}");
-                    return;
-                }
-
-                // Get tenant service from DI
-                var tenantService = context.RequestServices.GetRequiredService<ITenantService>();
-                var tenant = await tenantService.GetByApiKeyAsync(apiKey);
-                
-                if (tenant == null)
-                {
-                    _logger.LogWarning("Invalid API key attempted: {ApiKey} from {IpAddress}", 
-                        apiKey.Substring(0, Math.Min(apiKey.Length, 8)) + "...", 
-                        context.Connection.RemoteIpAddress);
-                    
-                    context.Response.StatusCode = 401;
-                    context.Response.ContentType = "application/json";
-                    await context.Response.WriteAsync("{\"error\":\"Invalid API key\"}");
-                    return;
-                }
-
-                // Set tenant context
-                context.Items["TenantId"] = tenant.Id;
-                context.Items["TenantName"] = tenant.Name;
-                
-                // Set current tenant in thread-safe context
-                var currentTenant = context.RequestServices.GetRequiredService<ICurrentTenant>();
-                currentTenant.Id = tenant.Id;
-                currentTenant.Name = tenant.Name;
-                currentTenant.StripeAccountId = tenant.StripeAccountId;
-                
-                // Add tenant info to response headers for debugging (only in development)
-                var env = context.RequestServices.GetRequiredService<IWebHostEnvironment>();
-                if (env.IsDevelopment())
-                {
-                    context.Response.Headers.Append("X-Tenant-Id", tenant.Id.ToString());
-                }
-
-                // Log successful authentication
-                _logger.LogInformation("Request authenticated for tenant {TenantName} ({TenantId})", 
-                    tenant.Name, tenant.Id);
-
-                // Continue to next middleware
-                await _next(context);
+                context.Response.StatusCode = 401;
+                await context.Response.WriteAsync("Invalid API Key");
+                return;
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error in tenant middleware");
-                throw;
-            }
-            finally
-            {
-                // Log performance metrics
-                var duration = DateTime.UtcNow - startTime;
-                if (duration.TotalMilliseconds > 5)
-                {
-                    _logger.LogWarning("Tenant middleware took {Duration}ms, exceeding 5ms threshold", 
-                        duration.TotalMilliseconds);
-                }
-            }
+            
+            context.Items["TenantId"] = tenant.Id;
+            context.Items["Tenant"] = tenant;
+            
+            // Set the current tenant for the request
+            CurrentTenant.Id = tenant.Id;
+            
+            await _next(context);
         }
     }
 
-    // Extension method to easily add middleware to pipeline
     public static class TenantMiddlewareExtensions
     {
         public static IApplicationBuilder UseTenantMiddleware(this IApplicationBuilder builder)
@@ -109,4 +51,3 @@ namespace CompliGenie.Middleware
         }
     }
 }
-
