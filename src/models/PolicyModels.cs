@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace CompliGenie.Models
@@ -31,6 +31,7 @@ namespace CompliGenie.Models
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public int Order { get; set; }
+        public int PageNumber { get; set; }
     }
 
     public class GenerationRequest

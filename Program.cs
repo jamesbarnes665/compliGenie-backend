@@ -1,6 +1,7 @@
 using CompliGenie.Middleware;
 using CompliGenie.Services;
 using CompliGenie.Services.Interfaces;
+using CompliGenie.Data;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,11 +27,17 @@ builder.Services.AddScoped<CompliGenie.Services.Interfaces.IEmailService, MockEm
 
 // Policy Generation Services
 builder.Services.AddScoped<IPromptService, PromptService>();
-builder.Services.AddScoped<ILangChainService, LangChainService>();
+// MOCK MODE ENABLED - Remove this line to use real OpenAI
+// builder.Services.AddScoped<ILangChainService, LangChainService>();
+builder.Services.AddScoped<ILangChainService, MockLangChainService>();
 builder.Services.AddScoped<IPolicyGenerator, PolicyGenerator>();
 
 // Add HttpClient for LangChainService
-builder.Services.AddHttpClient<ILangChainService, LangChainService>();
+// builder.Services.AddHttpClient<ILangChainService, LangChainService>();
+
+// PDF Generation Services
+builder.Services.AddScoped<IPdfGenerationService, SimplePdfGenerationService>();
+
 
 var app = builder.Build();
 
@@ -55,3 +62,4 @@ app.Run();
 
 // Make Program accessible to tests
 public partial class Program { }
+
