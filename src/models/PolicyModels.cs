@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 using System;
+=======
+﻿using System;
+>>>>>>> origin/main
 using System.Collections.Generic;
 
 namespace CompliGenie.Models
@@ -31,7 +35,10 @@ namespace CompliGenie.Models
         public string Title { get; set; } = string.Empty;
         public string Content { get; set; } = string.Empty;
         public int Order { get; set; }
+<<<<<<< HEAD
         public int PageNumber { get; set; }
+=======
+>>>>>>> origin/main
     }
 
     public class GenerationRequest
@@ -48,4 +55,8 @@ namespace CompliGenie.Models
         public int TokensUsed { get; set; }
         public TimeSpan Duration { get; set; }
     }
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> origin/main

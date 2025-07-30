@@ -27,6 +27,7 @@ builder.Services.AddScoped<CompliGenie.Services.Interfaces.IEmailService, MockEm
 
 // Policy Generation Services
 builder.Services.AddScoped<IPromptService, PromptService>();
+<<<<<<< HEAD
 // MOCK MODE ENABLED - Remove this line to use real OpenAI
 // builder.Services.AddScoped<ILangChainService, LangChainService>();
 builder.Services.AddScoped<ILangChainService, MockLangChainService>();
@@ -38,6 +39,13 @@ builder.Services.AddScoped<IPolicyGenerator, PolicyGenerator>();
 // PDF Generation Services
 builder.Services.AddScoped<IPdfGenerationService, SimplePdfGenerationService>();
 
+=======
+builder.Services.AddScoped<ILangChainService, LangChainService>();
+builder.Services.AddScoped<IPolicyGenerator, PolicyGenerator>();
+
+// Add HttpClient for LangChainService
+builder.Services.AddHttpClient<ILangChainService, LangChainService>();
+>>>>>>> origin/main
 
 var app = builder.Build();
 
@@ -61,5 +69,9 @@ app.MapControllers();
 app.Run();
 
 // Make Program accessible to tests
+<<<<<<< HEAD
 public partial class Program { }
 
+=======
+public partial class Program { }
+>>>>>>> origin/main
