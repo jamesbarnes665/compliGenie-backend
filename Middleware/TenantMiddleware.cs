@@ -1,62 +1,44 @@
-using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Http;
 using System.Threading.Tasks;
 using System.Linq;
-using CompliGenie.Data;
-using Microsoft.EntityFrameworkCore;
+using CompliGenie.Services;
+using CompliGenie.Services.Interfaces;
 
 namespace CompliGenie.Middleware
 {
     public class TenantMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly string[] _excludedPaths = new[] { 
-            "/api/health", 
-            "/api/setup",
-            "/swagger", 
-            "/swagger/index.html" 
-        };
 
         public TenantMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context, ApplicationDbContext dbContext)
+        public async Task InvokeAsync(HttpContext context, ITenantService tenantService)
         {
-            // Skip authentication for excluded paths
-            var path = context.Request.Path.Value?.ToLower() ?? "";
-            if (_excludedPaths.Any(excludedPath => path.StartsWith(excludedPath)))
-            {
-                await _next(context);
-                return;
-            }
-
             var apiKey = context.Request.Headers["X-API-Key"].FirstOrDefault();
-            
             if (string.IsNullOrEmpty(apiKey))
             {
                 context.Response.StatusCode = 401;
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync("API key required");
+                await context.Response.WriteAsync("Missing API Key");
                 return;
             }
-
-            // In production, hash the API key before comparing
-            var tenant = await dbContext.Tenants
-                .FirstOrDefaultAsync(t => t.ApiKeyHash == apiKey);
-
+            
+            var tenant = await tenantService.GetByApiKeyAsync(apiKey);
             if (tenant == null)
             {
                 context.Response.StatusCode = 401;
-                context.Response.ContentType = "text/plain";
-                await context.Response.WriteAsync("Invalid API key");
+                await context.Response.WriteAsync("Invalid API Key");
                 return;
             }
-
-            CurrentTenant.Id = tenant.Id;
+            
             context.Items["TenantId"] = tenant.Id;
             context.Items["Tenant"] = tenant;
-
+            
+            // Set the current tenant for the request
+            CurrentTenant.Id = tenant.Id;
+            
             await _next(context);
         }
     }

@@ -1,0 +1,43 @@
+﻿Generate a comprehensive workplace AI governance policy:
+
+1. EXECUTIVE SUMMARY (1 page)
+   - Purpose of workplace AI governance
+   - Commitment to fair employment practices
+   - Legal compliance overview
+
+2. AI IN RECRUITMENT & HIRING (2 pages)
+   - Resume screening AI guidelines
+   - Interview AI tools policies
+   - Bias prevention measures
+   - Candidate notification requirements
+   - Human review requirements
+
+3. AI IN EMPLOYEE MANAGEMENT (2 pages)
+   - Performance monitoring AI
+   - Productivity tracking guidelines
+   - Employee sentiment analysis
+   - Promotion/termination decisions
+   - Required human oversight
+
+4. DATA PRIVACY & EMPLOYEE RIGHTS (2 pages)
+   - Employee data collection limits
+   - Consent requirements
+   - Access to AI decisions
+   - Correction procedures
+   - State-specific requirements
+
+5. BIAS PREVENTION & AUDITING (1.5 pages)
+   - Regular bias testing requirements
+   - Adverse impact analysis
+   - Third-party auditing
+   - Remediation procedures
+
+6. TRAINING & ACCOUNTABILITY (1.5 pages)
+   - Manager training on AI tools
+   - Employee awareness programs
+   - Violation consequences
+   - Grievance procedures
+
+Company Size: {COMPANY_SIZE}
+AI Tools: {AI_TOOLS_LIST}
+Jurisdictions: {JURISDICTIONS}
