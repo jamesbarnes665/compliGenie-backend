@@ -1,0 +1,34 @@
+﻿Generate a comprehensive AI governance policy for businesses:
+
+1. EXECUTIVE SUMMARY (1 page)
+   - Purpose and scope of AI governance
+   - Business objectives and AI alignment
+   - Leadership commitment
+
+2. AI USAGE GUIDELINES (2 pages)
+   - Approved AI tools and use cases
+   - Data privacy and security protocols
+   - Ethical AI principles
+   - Specific business applications
+
+3. DATA PROTECTION & PRIVACY (2 pages)
+   - Customer data handling in AI systems
+   - Data retention and deletion policies
+   - Security measures
+   - Breach response procedures
+
+4. COMPLIANCE & REGULATORY (1.5 pages)
+   - Industry regulations
+   - Data protection laws
+   - Audit requirements
+   - Reporting obligations
+
+5. TRAINING & ACCOUNTABILITY (1.5 pages)
+   - Employee training programs
+   - Role responsibilities
+   - Policy violations
+   - Update procedures
+
+Company Size: {COMPANY_SIZE}
+AI Tools: {AI_TOOLS_LIST}
+Industry: General Business
