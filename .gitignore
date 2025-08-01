@@ -1,0 +1,48 @@
+# Build results
+[Dd]ebug/
+[Rr]elease/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio
+.vs/
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# NuGet
+*.nupkg
+packages/
+
+# SQLite
+*.db-shm
+*.db-wal
+
+# Temporary files
+*.tmp
+*.temp
+add-tenant.sql
+add-tenant.csx
+add-test-tenant.ps1
+AddTestTenant.cs
+temp-*/
+tests-backup/
+tests-isolated/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+
+.env

@@ -1,0 +1,42 @@
+﻿Generate a risk-mitigation focused AI governance policy:
+
+1. EXECUTIVE RISK SUMMARY (1 page)
+   - AI risk landscape overview
+   - Potential liability exposures
+   - Insurance implications
+   - Risk mitigation commitment
+
+2. AI RISK IDENTIFICATION & CLASSIFICATION (2 pages)
+   - High-risk AI applications
+   - Medium-risk AI applications  
+   - Low-risk AI applications
+   - Risk scoring methodology
+
+3. LIABILITY PREVENTION MEASURES (2 pages)
+   - Pre-deployment testing requirements
+   - Ongoing monitoring protocols
+   - Error detection and correction
+   - Human oversight requirements
+   - Documentation standards
+
+4. INSURANCE COVERAGE CONSIDERATIONS (1.5 pages)
+   - Current coverage analysis
+   - AI-specific endorsements needed
+   - Claim scenarios and responses
+   - Premium optimization strategies
+
+5. INCIDENT RESPONSE & CLAIMS (1.5 pages)
+   - AI failure response procedures
+   - Evidence preservation
+   - Notification requirements
+   - Claims coordination
+
+6. COMPLIANCE & AUDIT TRAIL (2 pages)
+   - Audit log requirements
+   - Compliance checkpoints
+   - Third-party assessments
+   - Continuous improvement
+
+Company Size: {COMPANY_SIZE}
+AI Tools: {AI_TOOLS_LIST}
+Insurance Carriers: {CARRIERS}
